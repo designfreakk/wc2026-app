@@ -1,19 +1,44 @@
 # Theme adopts the Football Meets Data design language:
 # deep-navy text, warm cream background, signature amber accent.
-# Headings use the retro 8-bit "Press Start 2P"; body stays a clean sans.
+# Headings use the retro 8-bit "Press Start 2P"; body uses sporty "Barlow".
 [theme]
 primaryColor = "#ff9d00"             # signature amber — sliders, buttons, native chart bars
 backgroundColor = "#f5f1e8"          # warm cream / parchment (not stark white)
 secondaryBackgroundColor = "#e8e4d5" # deeper cream for sidebar + cards
 textColor = "#01002e"                # deep navy
 linkColor = "#3080ff"                # FMD link blue
-font = "sans serif"                  # body: readable sans
+font = "Barlow"                      # body: sporty, readable sans
 headingFont = "Press Start 2P"       # headings: 8-bit arcade display
 baseRadius = "0.5rem"
 
-# load the pixel display font for headings (single weight 400)
+# pixel display font for headings (single weight 400)
 [[theme.fontFaces]]
 family = "Press Start 2P"
 url = "https://cdn.jsdelivr.net/fontsource/fonts/press-start-2p@latest/latin-400-normal.woff2"
 weight = 400
+style = "normal"
+
+# Barlow body font — regular, medium, semibold, bold
+[[theme.fontFaces]]
+family = "Barlow"
+url = "https://cdn.jsdelivr.net/fontsource/fonts/barlow@latest/latin-400-normal.woff2"
+weight = 400
+style = "normal"
+
+[[theme.fontFaces]]
+family = "Barlow"
+url = "https://cdn.jsdelivr.net/fontsource/fonts/barlow@latest/latin-500-normal.woff2"
+weight = 500
+style = "normal"
+
+[[theme.fontFaces]]
+family = "Barlow"
+url = "https://cdn.jsdelivr.net/fontsource/fonts/barlow@latest/latin-600-normal.woff2"
+weight = 600
+style = "normal"
+
+[[theme.fontFaces]]
+family = "Barlow"
+url = "https://cdn.jsdelivr.net/fontsource/fonts/barlow@latest/latin-700-normal.woff2"
+weight = 700
 style = "normal"

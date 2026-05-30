@@ -95,6 +95,7 @@ R = st.session_state["results"]
 
 # ---- main page: bracket first, then title race -------------------------------
 st.title("🏆 World Cup 2026 — who wins?")
+st.caption("New here? 👋 Open **Welcome** in the left sidebar for a 1-minute plain-English explainer.")
 st.markdown(
     f"#### Most likely champion: **{R['winner']}** "
     f"({R['title'][R['winner']]*100:.1f}% of simulations)"

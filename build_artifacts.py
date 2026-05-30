@@ -13,7 +13,26 @@ import io, json, urllib.request, datetime as dt
 from collections import defaultdict, deque
 import numpy as np, pandas as pd
 from sklearn.ensemble import HistGradientBoostingRegressor
+from sklearn.inspection import permutation_importance
 import statsmodels.api as sm, statsmodels.formula.api as smf
+
+# Held-out backtest results (from backtest.py, cutoff 2025-06-01). These describe
+# how this exact methodology performs on matches it never saw during training, so
+# we surface them on the app's front page as honest accuracy metrics.
+BACKTEST = {
+    "cutoff": "2025-06-01", "test_n": 953, "test_competitive": 697,
+    "all":         {"n": 953, "winner": 57.5, "exact": 9.7, "mae": 1.89, "model2": 79.6, "elo2": 79.0, "draws": 22.9},
+    "competitive": {"n": 697, "winner": 59.7, "exact": 8.9, "mae": 1.92, "model2": 79.6, "elo2": 79.6, "draws": 21.2},
+    "friendlies":  {"n": 256, "winner": 51.6, "exact": 11.7, "mae": 1.80, "model2": 79.6, "elo2": 77.4, "draws": 27.3},
+}
+# human-friendly labels for the model's input features
+FEATURE_LABELS = {
+    "is_home": "Home advantage", "competitive": "Competitive match",
+    "elo": "Team strength (Elo)", "opp_elo": "Opponent strength (Elo)",
+    "elo_diff": "Strength gap", "form_gf": "Recent goals scored",
+    "form_ga": "Recent goals conceded", "opp_form_gf": "Opp. recent goals scored",
+    "opp_form_ga": "Opp. recent goals conceded",
+}
 
 HERE = __file__.rsplit("/", 1)[0]
 UA = {"User-Agent": "Mozilla/5.0"}
@@ -95,6 +114,24 @@ gb=HistGradientBoostingRegressor(loss="poisson",max_iter=400,learning_rate=0.05,
     min_samples_leaf=50,l2_regularization=1.0,random_state=0).fit(long[FEATURES],long["goals"])
 print("fitting Poisson GLM …"); P_INT,P_HOME,P_ATT,P_DEF = fit_poisson(RESULTS)
 
+# ---- permutation feature importance (how much each input drives the GB model) ----
+print("scoring feature importance …")
+_imp_idx = np.random.default_rng(0).choice(len(long), size=min(8000, len(long)), replace=False)
+_pi = permutation_importance(gb, long[FEATURES].iloc[_imp_idx], long["goals"].iloc[_imp_idx],
+                             n_repeats=5, random_state=0, scoring="neg_mean_poisson_deviance")
+_imp = sorted(zip(FEATURES, _pi.importances_mean), key=lambda kv: kv[1], reverse=True)
+_imax = max(v for _, v in _imp) or 1.0
+FEATURE_IMPORTANCE = [{"feature": FEATURE_LABELS.get(f, f),
+                       "importance": round(float(v / _imax), 4)} for f, v in _imp]
+
+# training-data span actually used by the model (after the ML cutoff)
+_train_df = RESULTS.dropna(subset=["home_score","away_score"])
+_train_df = _train_df[_train_df.date >= CUTOFF_ML]
+TRAIN_META = {"train_matches": int(len(_train_df)),
+              "train_from": _train_df.date.min().date().isoformat(),
+              "train_to": _train_df.date.max().date().isoformat(),
+              "results_rows": int(len(RESULTS))}
+
 gf=pd.read_csv(HERE+"/data/group_fixtures.csv"); ks=pd.read_csv(HERE+"/data/knockout_slots.csv")
 teams=sorted(set(gf.home_team)|set(gf.away_team))
 
@@ -127,7 +164,9 @@ for i,(key,h,a,ihh,iha) in enumerate(entries):
     lh=(ph**(1-BLEND_W))*(ml_h[i]**BLEND_W); la=(pa**(1-BLEND_W))*(ml_a[i]**BLEND_W)
     base[key]=[round(float(lh),4), round(float(la),4)]
 
-out={"meta":{"results_source":SRC,"built":dt.date.today().isoformat(),"n_pairs":len(base)},
+out={"meta":{"results_source":SRC,"built":dt.date.today().isoformat(),"n_pairs":len(base),
+             **TRAIN_META, "backtest":BACKTEST, "feature_importance":FEATURE_IMPORTANCE,
+             "blend_w":BLEND_W, "form_n":FORM_N},
      "teams":teams,"base":base}
 path=HERE+"/artifacts.json"
 with open(path,"w") as f: json.dump(out,f)

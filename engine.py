@@ -82,6 +82,23 @@ def make_pair(base, mult, avail):
     return pair
 
 
+def scoreline_grid(pair, h, a, venue="", kmax=6):
+    """P(home scores i, away scores j) for i,j in 0..kmax, using the model's
+    expected goals (lh, la) for this matchup as independent Poisson rates.
+
+    Returns (grid, lh, la) where grid[i, j] is the probability of that exact
+    scoreline. Mirrors exactly what the simulator rolls each game, so the
+    heatmap on the front page is a faithful picture of the model's beliefs.
+    """
+    lh, la = pair(h, a, venue)
+    ks = np.arange(kmax + 1)
+    # Poisson pmf without scipy: exp(-l) * l^k / k!
+    logf = np.cumsum([0.0] + [np.log(i) for i in range(1, kmax + 1)])  # log k!
+    ph = np.exp(-lh + ks * np.log(lh) - logf)
+    pa = np.exp(-la + ks * np.log(la) - logf)
+    return np.outer(ph, pa), float(lh), float(la)
+
+
 def simulate_once(rng, gf, ks, pair):
     stats = defaultdict(lambda: {"GF": 0, "GA": 0, "Pts": 0, "group": None}); gm = {}
     for _, r in gf.iterrows():

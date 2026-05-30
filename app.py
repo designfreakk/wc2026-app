@@ -270,7 +270,7 @@ with st.container(key="sec_pred"):
             chart_df = pd.DataFrame(
                 {"team": top, "win %": [R["title"][t] * 100 for t in top]}
             ).set_index("team")
-            st.bar_chart(chart_df, horizontal=True)
+            st.bar_chart(chart_df, horizontal=True, color="#fc0017")
             st.caption(
                 f"Chance of winning the World Cup · {R['market_src']}. Percentages wiggle "
                 "a little each run — that's the uncertainty, not a bug."

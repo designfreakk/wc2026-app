@@ -1,0 +1,134 @@
+"""Render a NYT-style visual knockout bracket (circular flags + connector lines).
+
+Centered final: the left half flows R32 → Final left-to-right, the right half
+mirrors it. Built as self-contained HTML/CSS so it drops into a Streamlit
+components.html() iframe. The tree is binary (every match has exactly two
+feeders), which lets the connector lines be drawn exactly with CSS.
+"""
+
+# team name -> ISO code understood by flagcdn.com
+ISO = {
+    "Algeria": "dz", "Argentina": "ar", "Australia": "au", "Austria": "at",
+    "Belgium": "be", "Brazil": "br", "Cabo Verde": "cv", "Canada": "ca",
+    "Colombia": "co", "Croatia": "hr", "Curaçao": "cw", "Côte d'Ivoire": "ci",
+    "Ecuador": "ec", "Egypt": "eg", "England": "gb-eng", "France": "fr",
+    "Germany": "de", "Ghana": "gh", "Haiti": "ht", "Iran": "ir", "Japan": "jp",
+    "Jordan": "jo", "Mexico": "mx", "Morocco": "ma", "Netherlands": "nl",
+    "New Zealand": "nz", "Norway": "no", "Panama": "pa", "Paraguay": "py",
+    "Portugal": "pt", "Qatar": "qa", "Saudi Arabia": "sa", "Scotland": "gb-sct",
+    "Senegal": "sn", "South Africa": "za", "South Korea": "kr", "Spain": "es",
+    "Switzerland": "ch", "Tunisia": "tn", "USA": "us", "Uruguay": "uy",
+    "Uzbekistan": "uz",
+}
+
+# Bracket tree: match_id -> (feeder_home, feeder_away). Leaves (R32) absent.
+FEEDS = {
+    # Round of 16
+    89: (73, 75), 90: (74, 77), 93: (83, 84), 94: (81, 82),
+    91: (76, 78), 92: (79, 80), 95: (86, 88), 96: (85, 87),
+    # Quarter-finals
+    97: (89, 90), 98: (93, 94), 99: (91, 92), 100: (95, 96),
+    # Semi-finals
+    101: (97, 98), 102: (99, 100),
+}
+LEFT_ROOT, RIGHT_ROOT, FINAL = 101, 102, 104
+
+
+def _flag(team):
+    code = ISO.get(team)
+    if code:
+        return (f'<img class="flag" src="https://flagcdn.com/w40/{code}.png" '
+                f'alt="{team}" title="{team}">')
+    # placeholder (unresolved playoff slot)
+    abbr = "".join(w[0] for w in team.split()[:2]).upper()[:3]
+    return f'<span class="flag ph" title="{team}">{abbr}</span>'
+
+
+def _team_row(team, score, won):
+    cls = "team won" if won else "team lost"
+    sc = "" if score is None else f'<span class="score">{score}</span>'
+    return (f'<div class="{cls}"><span class="name" title="{team}">{team}</span>'
+            f'{_flag(team)}{sc}</div>')
+
+
+def _match_box(mid, ko, side):
+    """One match card: two team rows, winner highlighted."""
+    if mid not in ko:
+        body = (_team_row("TBD", None, False) + _team_row("TBD", None, False))
+    else:
+        h, a, hg, ag, ws, pens = ko[mid]
+        hw, aw = (ws == "home"), (ws == "away")
+        p = " p" if pens else ""
+        body = (_team_row(h, f"{hg}{p if hw else ''}", hw)
+                + _team_row(a, f"{ag}{p if aw else ''}", aw))
+    return f'<div class="match {side}">{body}</div>'
+
+
+def _node(mid, ko, side):
+    """Recursive subtree. side='l' (children on left) or 'r' (mirror)."""
+    feed = FEEDS.get(mid)
+    box = f'<div class="match-wrap {side}">{_match_box(mid, ko, side)}</div>'
+    if not feed:
+        return box
+    kids = f'<div class="children {side}">' + "".join(_node(c, ko, side) for c in feed) + "</div>"
+    inner = (kids + box) if side == "l" else (box + kids)
+    return f'<div class="node {side}">{inner}</div>'
+
+
+def render(ko, height=620):
+    """Return an HTML string for components.html()."""
+    left = _node(LEFT_ROOT, ko, "l")
+    right = _node(RIGHT_ROOT, ko, "r")
+    final = _match_box(FINAL, ko, "f")
+    champ = ""
+    if FINAL in ko:
+        h, a, hg, ag, ws, pens = ko[FINAL]
+        w = h if ws == "home" else a
+        champ = f'<div class="champ">🏆 {w}</div>'
+    css = """
+    <style>
+      .wrap{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#fff;
+            overflow-x:auto;padding:8px 4px;}
+      .bracket{display:flex;align-items:stretch;min-width:1100px;height:__H__px;}
+      .half{display:flex;flex:1;}
+      .center{display:flex;flex-direction:column;align-items:center;
+              justify-content:center;padding:0 10px;min-width:150px;}
+      .champ{margin-top:10px;font-weight:700;font-size:15px;color:#0b7;}
+      .node{display:flex;align-items:stretch;flex:1;}
+      .children{display:flex;flex-direction:column;justify-content:center;
+                position:relative;flex:1;}
+      /* vertical line joining a pair of children (exact: matches sit at 25%/75%) */
+      .children.l::after,.children.r::after{content:"";position:absolute;
+                top:25%;bottom:25%;border-top:0;}
+      .children.l::after{right:0;border-right:2px solid #d0d5dd;}
+      .children.r::after{left:0;border-left:2px solid #d0d5dd;}
+      .match-wrap{display:flex;align-items:center;position:relative;padding:0 14px;}
+      /* horizontal stub from each match toward its parent */
+      .match-wrap.l::before{content:"";position:absolute;left:0;top:50%;
+            width:14px;height:2px;background:#d0d5dd;}
+      .match-wrap.r::before{content:"";position:absolute;right:0;top:50%;
+            width:14px;height:2px;background:#d0d5dd;}
+      /* the very first column (R32 leaves) has no incoming line on the outer side */
+      .match{background:#fff;border:1px solid #e5e7eb;border-radius:8px;
+             box-shadow:0 1px 2px rgba(0,0,0,.06);min-width:118px;overflow:hidden;}
+      .match.f{min-width:140px;border-color:#0b7;box-shadow:0 2px 8px rgba(0,180,120,.25);}
+      .team{display:flex;align-items:center;gap:6px;padding:4px 7px;font-size:12px;
+            border-bottom:1px solid #f0f1f3;}
+      .team:last-child{border-bottom:0;}
+      .team .name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+      .team.won{font-weight:700;color:#111;}
+      .team.lost{color:#9aa1ab;}
+      .team.lost .flag{filter:grayscale(.7);opacity:.6;}
+      .flag{width:20px;height:20px;border-radius:50%;object-fit:cover;
+            border:1px solid #e5e7eb;flex:none;}
+      .flag.ph{display:inline-flex;align-items:center;justify-content:center;
+            background:#eef0f3;color:#667;font-size:8px;font-weight:700;}
+      .score{min-width:14px;text-align:right;font-variant-numeric:tabular-nums;}
+    </style>
+    """.replace("__H__", str(height))
+    html = ('<meta charset="utf-8">' + css + '<div class="wrap"><div class="bracket">'
+            f'<div class="half lh">{left}</div>'
+            f'<div class="center"><div class="rlabel">FINAL</div>{final}{champ}</div>'
+            f'<div class="half rh">{right}</div>'
+            '</div></div>')
+    return html

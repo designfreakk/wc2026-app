@@ -127,7 +127,7 @@ def render(ko, height=620):
       .match-wrap.r::before{content:"";position:absolute;right:0;top:50%;
             width:14px;height:2px;background:#d0d5dd;}
       /* the very first column (R32 leaves) has no incoming line on the outer side */
-      .match{background:#fff;border:1px solid #e5e7eb;border-radius:8px;
+      .match{background:#fff;border:1px solid #dee2e6;border-radius:8px;
              box-shadow:0 1px 2px rgba(0,0,0,.06);min-width:118px;overflow:hidden;}
       .match.f{min-width:140px;border-color:#fc0017;box-shadow:0 2px 8px rgba(252,0,23,.28);}
       .team{display:flex;align-items:center;gap:6px;padding:4px 7px;font-size:12px;
@@ -138,7 +138,7 @@ def render(ko, height=620):
       .team.lost{color:#9aa1ab;}
       .team.lost .flag{filter:grayscale(.7);opacity:.6;}
       .flag{width:20px;height:20px;border-radius:50%;object-fit:cover;
-            border:1px solid #e5e7eb;flex:none;}
+            border:1px solid #dee2e6;flex:none;}
       .flag.ph{display:inline-flex;align-items:center;justify-content:center;
             background:#eef0f3;color:#667;font-size:8px;font-weight:700;}
       .score{min-width:14px;text-align:right;font-variant-numeric:tabular-nums;}

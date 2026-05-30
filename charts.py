@@ -12,7 +12,7 @@ import altair as alt
 _AMBER = "#fc0017"   # signature red — bars, highlights, light gradient end
 _BURNT = "#c5394e"   # deeper red — emphasis marks, strong gradient end
 _NAVY = "#212529"    # neutral ink — text, axes, outlines
-_GRID = "#e9ecef"    # cool-grey gridlines
+_GRID = "#dee2e6"    # cool-grey gridlines
 
 
 def poisson_heatmap(grid, home, away, kmax=6):

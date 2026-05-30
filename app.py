@@ -28,9 +28,11 @@ st.markdown(
       [data-testid="stToolbar"], #MainMenu, footer{display:none!important;}
       [data-testid="stHeader"]{background:transparent;height:0;}
       .stApp{overflow-x:hidden;}
-      .block-container, [data-testid="stMainBlockContainer"]{padding-top:0!important;}
-      /* one-section-at-a-time scroll feel (gentle, won't trap scrolling) */
-      section[data-testid="stMain"]{ scroll-snap-type:y proximity; }
+      /* Zero the main column's gutters so our full-bleed bands truly span the
+         viewport edge-to-edge; each section re-introduces its own centred-column
+         padding below. (Fixes the white strip down the right side.) */
+      .block-container, [data-testid="stMainBlockContainer"]{
+                  padding:0!important; max-width:100%!important; }
 
       /* typography — Inter for body + headings, getfast tracking */
       html, body, [class*="st-"]{ letter-spacing:-0.2px; }
@@ -51,24 +53,24 @@ st.markdown(
 
       /* full-bleed dark hero SECTION — holds the headline, the centered Simulate
          button, and the bracket card floating on the dark band (getfast style) */
-      .st-key-hero{ width:100vw; margin-left:calc(50% - 50vw); background:#0e0e10;
-                  min-height:100vh; display:flex; flex-direction:column; align-items:center;
-                  justify-content:center; text-align:center; scroll-snap-align:start;
-                  padding:8vh max(22px, calc(50% - 480px)); box-sizing:border-box; }
+      .st-key-hero{ width:100vw; margin-left:calc(50% - 50vw); background:#1b1b1f;
+                  min-height:90vh; display:flex; flex-direction:column; align-items:center;
+                  justify-content:center; text-align:center;
+                  padding:clamp(4.5rem,11vh,8rem) max(22px, calc(50% - 580px)); box-sizing:border-box; }
       .hero-copy{ margin-bottom:4px; }
       .hero-copy .eyebrow{ color:#fc0017; font-weight:700; text-transform:uppercase;
                   letter-spacing:.26em; font-size:.82rem; margin-bottom:22px; }
       .st-key-hero h1{ color:#ffffff!important; font-size:4.6rem; line-height:1.02; letter-spacing:-0.04em;
                   margin:0 auto; max-width:15ch; font-weight:600; }
       .hero-copy .sub{ color:#aeb2ba; font-size:1.25rem; line-height:1.55; max-width:46ch; margin:24px auto 0; }
-      .hero-cap{ color:#9aa1ab; font-size:.92rem; line-height:1.5; max-width:62ch; margin:14px auto 0; }
+      .hero-cap{ color:#949ca2; font-size:.92rem; line-height:1.5; max-width:62ch; margin:14px auto 0; }
       .hero-cap b{ color:#e9ecef; }
       @media (max-width:760px){ .st-key-hero h1{ font-size:2.6rem; } }
 
       /* red pill buttons (primary) — getfast colour, centered */
       .stButton{ display:flex; justify-content:center; width:100%; }
       .stButton>button[kind="primary"]{ background:#fc0017; border:none; color:#fff;
-                  border-radius:3rem; font-weight:700; font-size:1.05rem; padding:.85rem 2.8rem;
+                  border-radius:3.125rem; font-weight:700; font-size:1.05rem; padding:.85rem 2.8rem;
                   box-shadow:0 8px 24px rgba(252,0,23,.30); }
       .stButton>button[kind="primary"]:hover{ background:#d80014; color:#fff; }
       .stButton>button[kind="primary"]:active, .stButton>button[kind="primary"]:focus{ color:#fff; }
@@ -77,16 +79,15 @@ st.markdown(
       [data-testid="stIFrame"] iframe, iframe[title="st.iframe"]{
                   background:#fff; border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,.45); }
 
-      /* Each content block fills ~one screen as a full-bleed band, with its
-         content held in a centred ~960px column (generous getfast-style side
-         margins). The horizontal padding clamps the column and falls back to a
-         small gutter on narrow screens. */
+      /* Full-bleed bands that flow at their natural height (getfast doesn't force
+         each to a full screen — it just gives them roomy vertical padding). The
+         content sits in a centred ~960px column via the horizontal padding,
+         which collapses to a small gutter on narrow screens. */
       .st-key-sec_pred, .st-key-sec_data, .st-key-sec_how, .st-key-sec_mod, .st-key-sec_cta{
                   width:100vw; margin-left:calc(50% - 50vw); box-sizing:border-box;
-                  min-height:100vh; display:flex; flex-direction:column; justify-content:center;
-                  scroll-snap-align:start; padding:9vh max(22px, calc(50% - 480px)); }
-      /* alternating section backgrounds (sec_pred stays transparent so the
-         bracket keeps reading as a white card floating on the dark hero seam) */
+                  display:flex; flex-direction:column;
+                  padding:clamp(3.5rem,8vh,6rem) max(22px, calc(50% - 480px)); }
+      /* alternating section backgrounds (sec_pred stays transparent → white) */
       .st-key-sec_data, .st-key-sec_mod{ background:#f7f9fb; }
       .st-key-sec_how, .st-key-sec_cta{ background:#ffffff; }
 

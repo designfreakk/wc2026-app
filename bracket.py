@@ -142,7 +142,7 @@ def render(ko, height=620):
       .rounds .match{min-width:0;width:100%;margin-bottom:8px;}
       .rounds .team{font-size:14px;padding:7px 10px;}
       .rounds .flag{width:22px;height:22px;}
-      .rounds .champ{margin:6px 0 0;text-align:center;font-size:17px;}
+      .rounds .champ{margin:0 0 14px;text-align:center;font-size:18px;}
       @media (max-width:760px){
         .wrap{overflow-x:hidden;}
         .bracket{display:none;}
@@ -150,13 +150,13 @@ def render(ko, height=620):
       }
     </style>
     """.replace("__H__", str(height))
-    # stacked round-by-round view for narrow screens
+    # stacked view for narrow screens: champion first, then Final → R32
     rounds = ""
-    for name, mids in ROUNDS:
+    for name, mids in reversed(ROUNDS):
         cards = "".join(_match_box(m, ko, "m") for m in mids if m in ko)
         if cards:
             rounds += f'<div class="rnd"><div class="rnd-title">{name}</div>{cards}</div>'
-    rounds = f'<div class="rounds">{rounds}{champ}</div>'
+    rounds = f'<div class="rounds">{champ}{rounds}</div>'
     html = ('<meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width, initial-scale=1">'
             + css + '<div class="wrap"><div class="bracket">'

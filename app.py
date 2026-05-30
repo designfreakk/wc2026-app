@@ -73,9 +73,18 @@ st.markdown(
       [data-testid="stIFrame"] iframe, iframe[title="st.iframe"]{
                   background:#fff; border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,.45); }
 
-      /* each content block fills ~one screen, vertically centred */
+      /* Each content block fills ~one screen as a full-bleed band, with its
+         content held in a centred ~960px column (generous getfast-style side
+         margins). The horizontal padding clamps the column and falls back to a
+         small gutter on narrow screens. */
       .st-key-sec_pred, .st-key-sec_data, .st-key-sec_how, .st-key-sec_mod, .st-key-sec_cta{
-                  min-height:100vh; justify-content:center; scroll-snap-align:start; padding:7vh 0; }
+                  width:100vw; margin-left:calc(50% - 50vw); box-sizing:border-box;
+                  min-height:100vh; display:flex; flex-direction:column; justify-content:center;
+                  scroll-snap-align:start; padding:9vh max(22px, calc(50% - 480px)); }
+      /* alternating section backgrounds (sec_pred stays transparent so the
+         bracket keeps reading as a white card floating on the dark hero seam) */
+      .st-key-sec_data, .st-key-sec_mod{ background:#f7f9fb; }
+      .st-key-sec_how, .st-key-sec_cta{ background:#ffffff; }
 
       /* section header block */
       .sec{ text-align:center; max-width:62ch; margin:0 auto 2.6rem; }

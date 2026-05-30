@@ -33,6 +33,15 @@ FEEDS = {
 }
 LEFT_ROOT, RIGHT_ROOT, FINAL = 101, 102, 104
 
+# Round groupings for the stacked mobile view (match_id ranges are fixed).
+ROUNDS = [
+    ("Round of 32", list(range(73, 89))),
+    ("Round of 16", list(range(89, 97))),
+    ("Quarter-finals", [97, 98, 99, 100]),
+    ("Semi-finals", [101, 102]),
+    ("Final", [104]),
+]
+
 
 def _flag(team):
     code = ISO.get(team)
@@ -124,11 +133,35 @@ def render(ko, height=620):
       .flag.ph{display:inline-flex;align-items:center;justify-content:center;
             background:#eef0f3;color:#667;font-size:8px;font-weight:700;}
       .score{min-width:14px;text-align:right;font-variant-numeric:tabular-nums;}
+      /* ---- stacked mobile view (hidden on wide screens) ---- */
+      .rounds{display:none;padding:2px 6px 8px;}
+      .rnd{margin-bottom:16px;}
+      .rnd-title{margin:0 0 8px;padding-bottom:4px;font-size:13px;font-weight:700;
+            text-transform:uppercase;letter-spacing:.04em;color:#475467;
+            border-bottom:2px solid #eef0f3;}
+      .rounds .match{min-width:0;width:100%;margin-bottom:8px;}
+      .rounds .team{font-size:14px;padding:7px 10px;}
+      .rounds .flag{width:22px;height:22px;}
+      .rounds .champ{margin:6px 0 0;text-align:center;font-size:17px;}
+      @media (max-width:760px){
+        .wrap{overflow-x:hidden;}
+        .bracket{display:none;}
+        .rounds{display:block;}
+      }
     </style>
     """.replace("__H__", str(height))
-    html = ('<meta charset="utf-8">' + css + '<div class="wrap"><div class="bracket">'
+    # stacked round-by-round view for narrow screens
+    rounds = ""
+    for name, mids in ROUNDS:
+        cards = "".join(_match_box(m, ko, "m") for m in mids if m in ko)
+        if cards:
+            rounds += f'<div class="rnd"><div class="rnd-title">{name}</div>{cards}</div>'
+    rounds = f'<div class="rounds">{rounds}{champ}</div>'
+    html = ('<meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width, initial-scale=1">'
+            + css + '<div class="wrap"><div class="bracket">'
             f'<div class="half lh">{left}</div>'
             f'<div class="center"><div class="rlabel">FINAL</div>{final}{champ}</div>'
             f'<div class="half rh">{right}</div>'
-            '</div></div>')
+            f'</div>{rounds}</div>')
     return html

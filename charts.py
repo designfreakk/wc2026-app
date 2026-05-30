@@ -71,6 +71,63 @@ def model_vs_market_scatter(title_probs, market_probs, teams, top=18):
     return (line + pts + labels).properties(height=340)
 
 
+def _green_css(v):
+    """Inline-CSS green shade for a 0-100 percentage — a matplotlib-free stand-in
+    for Styler.background_gradient (matplotlib isn't a runtime dependency)."""
+    try:
+        f = max(0.0, min(1.0, float(v) / 100.0))
+    except (TypeError, ValueError):
+        return ""
+    txt = "#ffffff" if f > 0.55 else "#1a1a1a"
+    return f"background-color: rgba(11,183,119,{0.06 + 0.82 * f:.3f}); color:{txt};"
+
+
+_REACH_COLS = [("Round of 32", "Advance"), ("Round of 16", "Round of 16"),
+               ("Quarter-final", "Quarters"), ("Semi-final", "Semis"),
+               ("Final", "Final"), ("Champion", "Win it")]
+
+
+def advancement_table(agg, ranked, top=24):
+    """FiveThirtyEight-style 'how far does each team go' table: one row per team,
+    columns = chance of reaching each knockout round, shaded on a green gradient.
+    Returns a pandas Styler ready for st.dataframe."""
+    n = agg["n"] or 1
+    reach = agg["reach"]
+    teams = ranked[:top]
+    data = {label: [100 * reach[t].get(key, 0) / n for t in teams]
+            for key, label in _REACH_COLS}
+    df = pd.DataFrame(data, index=teams)
+    df.index.name = "Team"
+    cols = [label for _, label in _REACH_COLS]
+    return (df.style
+            .format("{:.0f}%")
+            .map(_green_css, subset=cols))
+
+
+def group_finish_table(agg):
+    """Per-group escape odds: win the group, finish top 2, and overall chance of
+    reaching the knockouts (top 2 + best-third). Sorted group, then by win-group %.
+    Returns a pandas Styler."""
+    n = agg["n"] or 1
+    fin, reach, grp = agg["finish"], agg["reach"], agg["group"]
+    rows = []
+    for t, g in grp.items():
+        rows.append({
+            "Group": g, "Team": t,
+            "Win group": 100 * fin[t].get(1, 0) / n,
+            "Top 2": 100 * (fin[t].get(1, 0) + fin[t].get(2, 0)) / n,
+            "Advance": 100 * reach[t].get("Round of 32", 0) / n,
+        })
+    df = (pd.DataFrame(rows)
+          .sort_values(["Group", "Win group"], ascending=[True, False])
+          .reset_index(drop=True))
+    pct = ["Win group", "Top 2", "Advance"]
+    return (df.style
+            .hide(axis="index")
+            .format({c: "{:.0f}%" for c in pct})
+            .map(_green_css, subset=pct))
+
+
 def feature_importance_bar(items):
     """Horizontal bar of which inputs move the goals model most (relative)."""
     df = pd.DataFrame(items)

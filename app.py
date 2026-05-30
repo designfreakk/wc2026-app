@@ -32,7 +32,7 @@ def model_probs(n_pass1):
     """Pass 1: pure-model title probabilities (no market, no injuries)."""
     teams, base, meta, gf, ks = get_artifacts()
     pair = engine.make_pair(base, {t: 1.0 for t in teams}, {})
-    champ, _, _, _ = engine.run(n_pass1, gf, ks, pair, seed=0)
+    champ, _, _, _, _ = engine.run(n_pass1, gf, ks, pair, seed=0)
     tot = sum(champ.values()) or 1
     return {t: champ.get(t, 0) / tot for t in teams}
 
@@ -44,7 +44,7 @@ def simulate(gamma, n_sims, avail, nonce, progress=None):
     mp = model_probs(600)  # pass 1: cheap, cached; enough to set market multipliers
     mult = engine.calibrate(market, mp, gamma=gamma)
     pair = engine.make_pair(base, mult, avail)
-    champ, gs, kk, samples = engine.run(
+    champ, gs, kk, samples, agg = engine.run(
         n_sims, gf, ks, pair, seed=1 + nonce, collect=True, progress=progress)
     tot = sum(champ.values()) or 1
     title = {t: champ.get(t, 0) / tot for t in teams}
@@ -63,6 +63,7 @@ def simulate(gamma, n_sims, avail, nonce, progress=None):
         "ko": ko, "hda": hda, "n_sims": n_sims, "gamma": gamma,
         "avail": dict(avail), "meta": meta,
         "score_grid": grid, "final_lh": flh, "final_la": fla,
+        "agg": agg,
     }
 
 
@@ -131,6 +132,28 @@ st.caption(
     "Because every simulation rolls random scorelines, the percentages wiggle a "
     "little each run — that's the uncertainty, not a bug."
 )
+
+# ---- how far does each team go (advancement ladder) --------------------------
+st.subheader("How far does each team go?")
+st.caption(
+    "Share of simulations in which each team reaches each knockout round. Read "
+    "left to right — the deeper the green, the more likely. Top 24 by title odds."
+)
+st.dataframe(
+    charts.advancement_table(R["agg"], R["ranked"], top=24),
+    use_container_width=True,
+)
+
+# ---- group stage: who escapes the group --------------------------------------
+with st.expander("🟢 Group stage — who escapes their group?"):
+    st.caption(
+        "For all 12 groups: chance of winning the group, finishing top two, and "
+        "advancing to the knockouts (top two plus the best third-placed teams)."
+    )
+    st.dataframe(
+        charts.group_finish_table(R["agg"]),
+        use_container_width=True, height=460,
+    )
 
 # ---- how it works ------------------------------------------------------------
 st.divider()

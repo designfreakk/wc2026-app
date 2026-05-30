@@ -160,7 +160,10 @@ def simulate_once(rng, gf, ks, pair):
         results[r.match_id] = {"winner": winner, "loser": loser}
         km[r.match_id] = (h, a, hg, ag, ws, pens)
         if r["round"] == "Final": champ, runner = winner, loser
-    return {"champion": champ, "runner_up": runner, "reached": reached, "group_matches": gm, "ko_matches": km}
+    # group-stage finishing position (group, pos 1..4) for every team
+    finish = {row.team: (row.group, int(row.pos)) for _, row in st.iterrows()}
+    return {"champion": champ, "runner_up": runner, "reached": reached,
+            "group_matches": gm, "ko_matches": km, "finish": finish}
 
 
 def representative_bracket(gf, ks, pair, want=None, seed=99, max_tries=600):
@@ -180,21 +183,38 @@ def representative_bracket(gf, ks, pair, want=None, seed=99, max_tries=600):
     return last
 
 
+# knockout rounds, in order, that count toward the "how far do they go" ladder
+# (the third-place playoff is a consolation match and is deliberately excluded)
+REACH_LADDER = ["Round of 32", "Round of 16", "Quarter-final", "Semi-final", "Final"]
+
+
 def run(n, gf, ks, pair, seed=0, collect=False, progress=None):
-    """Simulate n tournaments. Returns (champ_counter, group_recs, ko_recs, samples).
+    """Simulate n tournaments. Returns (champ_counter, group_recs, ko_recs, samples, agg).
 
     `samples` maps each champion seen -> one full ko_matches bracket where they won,
     so the app can show a representative bracket for the favourite without a second
-    search loop. `progress(frac)` (optional) is called ~20× for a UI progress bar.
+    search loop. `agg` holds tournament-wide tallies aggregated over every run:
+        agg["reach"][team][round]  -> times that team reached that knockout round
+        agg["reach"][team]["Champion"] -> times that team won it all
+        agg["finish"][team][pos]   -> times that team finished 1st/2nd/3rd/4th in its group
+        agg["group"][team]         -> the team's group letter
+    `progress(frac)` (optional) is called ~20x for a UI progress bar.
     """
     rng = np.random.default_rng(seed); champ = Counter(); gs = defaultdict(list); kk = defaultdict(list)
     samples = {}
+    reach = defaultdict(Counter); finish = defaultdict(Counter); team_group = {}
     step = max(1, n // 20)
     for i in range(n):
         r = simulate_once(rng, gf, ks, pair); champ[r["champion"]] += 1
         if r["champion"] not in samples: samples[r["champion"]] = r["ko_matches"]
+        for team, rounds in r["reached"].items():
+            for rd in rounds: reach[team][rd] += 1
+        reach[r["champion"]]["Champion"] += 1
+        for team, (grp, pos) in r["finish"].items():
+            team_group[team] = grp; finish[team][pos] += 1
         if collect:
             for mid, rec in r["group_matches"].items(): gs[mid].append(rec)
             for mid, rec in r["ko_matches"].items(): kk[mid].append(rec)
         if progress is not None and (i + 1) % step == 0: progress((i + 1) / n)
-    return champ, gs, kk, samples
+    agg = {"reach": reach, "finish": finish, "group": team_group, "n": n}
+    return champ, gs, kk, samples, agg

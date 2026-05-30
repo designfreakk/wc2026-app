@@ -29,13 +29,15 @@ st.markdown(
       [data-testid="stHeader"]{background:transparent;height:0;}
       .stApp{overflow-x:hidden;}
       .block-container, [data-testid="stMainBlockContainer"]{padding-top:0!important;}
+      /* one-section-at-a-time scroll feel (gentle, won't trap scrolling) */
+      section[data-testid="stMain"]{ scroll-snap-type:y proximity; }
 
       /* typography — Inter for body + headings, getfast tracking */
       html, body, [class*="st-"]{ letter-spacing:-0.2px; }
       h1,h2,h3,h4{ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif!important;
-                   font-weight:600!important; letter-spacing:-0.01em; line-height:1.25!important;
+                   font-weight:600!important; letter-spacing:-0.01em; line-height:1.2!important;
                    overflow-wrap:anywhere; color:#212529; }
-      h2{ font-size:1.875rem!important; } h3{ font-size:1.5rem!important; } h4{ font-size:1.25rem!important; }
+      h2{ font-size:2.1rem!important; } h3{ font-size:1.5rem!important; } h4{ font-size:1.2rem!important; }
 
       /* full-bleed white top bar */
       .topbar{ position:sticky; top:0; z-index:1000; width:100vw; margin-left:calc(50% - 50vw);
@@ -47,32 +49,39 @@ st.markdown(
       .topbar .brand b{ color:#fc0017; font-weight:700; }
       .topbar .nav{ color:#6c757d; font-weight:500; font-size:.95rem; }
 
-      /* full-bleed dark hero band; following content overlaps up into it */
+      /* full-bleed dark hero band; fills ~one screen, content centered */
       .hero-band{ width:100vw; margin-left:calc(50% - 50vw); background:#0e0e10;
-                  text-align:center; padding:74px 16px 190px; margin-bottom:-120px; box-sizing:border-box; }
+                  min-height:82vh; display:flex; flex-direction:column; justify-content:center; align-items:center;
+                  text-align:center; padding:90px 16px 170px; margin-bottom:-120px; box-sizing:border-box;
+                  scroll-snap-align:start; }
       .hero-band .eyebrow{ color:#fc0017; font-weight:700; text-transform:uppercase;
-                  letter-spacing:.26em; font-size:.85rem; margin-bottom:20px; }
-      .hero-band h1{ color:#ffffff!important; font-size:4.2rem; line-height:1.04; letter-spacing:-0.035em;
-                  margin:0 auto; max-width:16ch; font-weight:600; }
-      .hero-band .sub{ color:#aeb2ba; font-size:1.2rem; line-height:1.5; max-width:48ch; margin:22px auto 0; }
-      @media (max-width:760px){ .hero-band h1{ font-size:2.6rem; } .hero-band{ padding-bottom:150px; margin-bottom:-100px; } }
+                  letter-spacing:.26em; font-size:.82rem; margin-bottom:22px; }
+      .hero-band h1{ color:#ffffff!important; font-size:4.6rem; line-height:1.02; letter-spacing:-0.04em;
+                  margin:0 auto; max-width:15ch; font-weight:600; }
+      .hero-band .sub{ color:#aeb2ba; font-size:1.25rem; line-height:1.55; max-width:46ch; margin:24px auto 0; }
+      @media (max-width:760px){ .hero-band h1{ font-size:2.6rem; } .hero-band{ min-height:90vh; padding-bottom:140px; margin-bottom:-100px; } }
 
-      /* red pill buttons (primary), centered */
-      .stButton{ text-align:center; }
+      /* red pill buttons (primary) — getfast colour, centered */
+      .stButton{ display:flex; justify-content:center; width:100%; }
       .stButton>button[kind="primary"]{ background:#fc0017; border:none; color:#fff;
-                  border-radius:3rem; font-weight:700; font-size:1.1rem; padding:.8rem 2.6rem; }
+                  border-radius:3rem; font-weight:700; font-size:1.05rem; padding:.85rem 2.8rem;
+                  box-shadow:0 8px 24px rgba(252,0,23,.30); }
       .stButton>button[kind="primary"]:hover{ background:#d80014; color:#fff; }
+      .stButton>button[kind="primary"]:active, .stButton>button[kind="primary"]:focus{ color:#fff; }
 
       /* the bracket renders in an iframe — make it a glowing white card on the seam */
       [data-testid="stIFrame"] iframe, iframe[title="st.iframe"]{
                   background:#fff; border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,.45); }
 
+      /* each content block fills ~one screen, vertically centred */
+      .st-key-sec_pred, .st-key-sec_data, .st-key-sec_how, .st-key-sec_mod, .st-key-sec_cta{
+                  min-height:100vh; justify-content:center; scroll-snap-align:start; padding:7vh 0; }
+
       /* section header block */
-      .sec{ text-align:center; max-width:60ch; margin:0 auto 6px; }
+      .sec{ text-align:center; max-width:62ch; margin:0 auto 2.6rem; }
       .sec .eyebrow{ color:#fc0017; font-weight:700; text-transform:uppercase; letter-spacing:.2em;
-                  font-size:.8rem; margin-bottom:10px; }
-      .sec h2{ margin:0; } .sec p{ color:#6c757d; font-size:1.05rem; margin:.5rem auto 0; }
-      hr{ border:none; border-top:1px solid #e6e8eb; margin:3.5rem 0; }
+                  font-size:.8rem; margin-bottom:14px; }
+      .sec h2{ margin:0; } .sec p{ color:#6c757d; font-size:1.15rem; line-height:1.6; margin:.9rem auto 0; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -183,38 +192,7 @@ st.markdown(
 
 st.button("Simulate", type="primary", key="btn_hero", on_click=trigger_simulation)
 
-# ---- the framed table: a representative bracket ------------------------------
-components.html(bracket.render(R["ko"], height=640), height=700, scrolling=False)
-st.caption(
-    f"One plausible run all the way to the final, where **{R['winner']}** lift the "
-    f"trophy ({R['title'][R['winner']]*100:.1f}% of {R['n_sims']:,} simulations). "
-    "Hit Simulate again — the path changes every time."
-)
-
-# ---- explore the rest of the results (kept as tabs for now) ------------------
-with st.expander("Explore more results — title race, group stage, full details"):
-    t_race, t_group, t_details = st.tabs(["🥇 Title Race", "📊 Group Stage", "📋 Details"])
-    with t_race:
-        top = R["ranked"][:12]
-        chart_df = pd.DataFrame(
-            {"team": top, "win %": [R["title"][t] * 100 for t in top]}
-        ).set_index("team")
-        st.bar_chart(chart_df, horizontal=True)
-        st.caption(
-            f"Chance of winning the World Cup · {R['market_src']}. Percentages wiggle "
-            "a little each run — that's the uncertainty, not a bug."
-        )
-        st.dataframe(charts.advancement_table(R["agg"], R["ranked"], top=24),
-                     use_container_width=True)
-    with t_group:
-        st.dataframe(charts.group_finish_table(R["agg"]),
-                     use_container_width=True, height=520)
-    with t_details:
-        views.render_details(R, ks)
-
-
-def section(eyebrow, title, sub=""):
-    st.markdown("<hr>", unsafe_allow_html=True)
+def section_header(eyebrow, title, sub=""):
     st.markdown(
         f'<div class="sec"><div class="eyebrow">{eyebrow}</div>'
         f'<h2>{title}</h2>{f"<p>{sub}</p>" if sub else ""}</div>',
@@ -222,116 +200,147 @@ def section(eyebrow, title, sub=""):
     )
 
 
+# ---- the framed table: a representative bracket ------------------------------
+with st.container(key="sec_pred"):
+    components.html(bracket.render(R["ko"], height=640), height=700, scrolling=False)
+    st.caption(
+        f"One plausible run all the way to the final, where **{R['winner']}** lift the "
+        f"trophy ({R['title'][R['winner']]*100:.1f}% of {R['n_sims']:,} simulations). "
+        "Hit Simulate again — the path changes every time."
+    )
+    with st.expander("Explore more results — title race, group stage, full details"):
+        t_race, t_group, t_details = st.tabs(["🥇 Title Race", "📊 Group Stage", "📋 Details"])
+        with t_race:
+            top = R["ranked"][:12]
+            chart_df = pd.DataFrame(
+                {"team": top, "win %": [R["title"][t] * 100 for t in top]}
+            ).set_index("team")
+            st.bar_chart(chart_df, horizontal=True)
+            st.caption(
+                f"Chance of winning the World Cup · {R['market_src']}. Percentages wiggle "
+                "a little each run — that's the uncertainty, not a bug."
+            )
+            st.dataframe(charts.advancement_table(R["agg"], R["ranked"], top=24),
+                         use_container_width=True)
+        with t_group:
+            st.dataframe(charts.group_finish_table(R["agg"]),
+                         use_container_width=True, height=520)
+        with t_details:
+            views.render_details(R, ks)
+
 # ══════════════════════════════════════════════════════════════════════════════
 # USED DATA SOURCES
 # ══════════════════════════════════════════════════════════════════════════════
-section("The inputs", "Used data sources",
-        "Everything the simulator stands on — what it is, and how much of it.")
-ds = pd.DataFrame([
-    {"Source": "International match results",
-     "What it provides": "Goals & results used to train the goals model",
-     "Coverage": f"{M['train_matches']:,} matches · {M['train_from'][:4]}–{M['train_to'][:4]}"},
-    {"Source": "Live betting market",
-     "What it provides": "Implied title odds, blended in via the market-trust dial",
-     "Coverage": R["market_src"]},
-    {"Source": "2026 tournament structure",
-     "What it provides": "Group draw, fixtures & the full knockout path",
-     "Coverage": "48 teams · 12 groups · 104 matches"},
-    {"Source": "Team strength priors",
-     "What it provides": "Per-team attack & defence ratings + home advantage",
-     "Coverage": "Derived from the match results above"},
-])
-st.dataframe(ds, hide_index=True, use_container_width=True)
+with st.container(key="sec_data"):
+    section_header("The inputs", "Used data sources",
+                   "Everything the simulator stands on — what it is, and how much of it.")
+    ds = pd.DataFrame([
+        {"Source": "International match results",
+         "What it provides": "Goals & results used to train the goals model",
+         "Coverage": f"{M['train_matches']:,} matches · {M['train_from'][:4]}–{M['train_to'][:4]}"},
+        {"Source": "Live betting market",
+         "What it provides": "Implied title odds, blended in via the market-trust dial",
+         "Coverage": R["market_src"]},
+        {"Source": "2026 tournament structure",
+         "What it provides": "Group draw, fixtures & the full knockout path",
+         "Coverage": "48 teams · 12 groups · 104 matches"},
+        {"Source": "Team strength priors",
+         "What it provides": "Per-team attack & defence ratings + home advantage",
+         "Coverage": "Derived from the match results above"},
+    ])
+    st.dataframe(ds, hide_index=True, use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # HOW IT WORKS
 # ══════════════════════════════════════════════════════════════════════════════
-section("Under the hood", "How it works",
-        "An ensemble football model, tilted toward the market, simulated end to end.")
-st.markdown(
-    "We start with a football model trained on every international match since "
-    f"{M['train_from'][:4]} — about {M['train_matches']:,} games. It's really *two* "
-    "models averaged: a classic **Poisson** goals model and a **machine-learning** "
-    "one, each predicting how many goals a team should score given strength, recent "
-    "form and home advantage.\n\n"
-    "We then nudge each team toward the **live betting market** (you control how hard "
-    "in *Modifications* below), because bookmakers price in news the raw stats miss. "
-    "Finally we **play the whole tournament** — all 104 matches, groups to final — "
-    "thousands of times, rolling realistic scorelines each game (penalty shootouts "
-    "included). How often each team wins is the percentage you see."
-)
-c1, c2, c3, c4 = st.columns(4)
-bt_c = M["backtest"]["competitive"]
-c1.metric("Tournaments simulated", f"{R['n_sims']:,}", help="Per run, using the current controls.")
-c2.metric("Matches trained on", f"{M['train_matches']:,}",
-          help=f"Internationals from {M['train_from']} to {M['train_to']}.")
-c3.metric("Winner accuracy", f"{bt_c['winner']:.0f}%",
-          help=f"Out-of-sample on {bt_c['n']} competitive matches the model never saw.")
-c4.metric("Goal error (MAE)", f"{bt_c['mae']:.2f}",
-          help="Average miss in goals-per-team on unseen matches. Lower is better.")
-
-st.markdown("**The model's-eye view of the final**")
-st.caption(
-    f"If **{R['winner']}** met **{R['runner']}** on neutral ground, here's the chance "
-    "of every scoreline. The outlined square is the single most likely one — exactly "
-    "what the simulator rolls each game."
-)
-st.altair_chart(charts.poisson_heatmap(R["score_grid"], R["winner"], R["runner"]),
-                use_container_width=True)
-
-t1, t2, t3 = st.tabs(["📈 Track record", "⚖️ Model vs market", "🎛️ What drives it"])
-with t1:
+with st.container(key="sec_how"):
+    section_header("Under the hood", "How it works",
+                   "An ensemble football model, tilted toward the market, simulated end to end.")
     st.markdown(
-        f"We hid every match after **{M['backtest']['cutoff']}**, retrained on the "
-        f"rest, and predicted those **{M['backtest']['test_n']:,}** unseen games."
+        "We start with a football model trained on every international match since "
+        f"{M['train_from'][:4]} — about {M['train_matches']:,} games. It's really *two* "
+        "models averaged: a classic **Poisson** goals model and a **machine-learning** "
+        "one, each predicting how many goals a team should score given strength, recent "
+        "form and home advantage.\n\n"
+        "We then nudge each team toward the **live betting market** (you control how hard "
+        "in *Modifications* below), because bookmakers price in news the raw stats miss. "
+        "Finally we **play the whole tournament** — all 104 matches, groups to final — "
+        "thousands of times, rolling realistic scorelines each game (penalty shootouts "
+        "included). How often each team wins is the percentage you see."
     )
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Picked the winner", f"{bt_c['winner']:.0f}%", help="3-way (win/draw/loss) on competitive matches.")
-    m2.metric("Exact scoreline", f"{bt_c['exact']:.0f}%", help="~10% is normal for football.")
-    m3.metric("Goal error (MAE)", f"{bt_c['mae']:.2f}", help="Average goals-per-team miss.")
-    m4.metric("vs. Elo baseline", f"+{bt_c['model2'] - bt_c['elo2']:.1f} pts",
-              help=f"Model {bt_c['model2']:.0f}% vs Elo {bt_c['elo2']:.0f}% head-to-head.")
+    c1, c2, c3, c4 = st.columns(4)
+    bt_c = M["backtest"]["competitive"]
+    c1.metric("Tournaments simulated", f"{R['n_sims']:,}", help="Per run, using the current controls.")
+    c2.metric("Matches trained on", f"{M['train_matches']:,}",
+              help=f"Internationals from {M['train_from']} to {M['train_to']}.")
+    c3.metric("Winner accuracy", f"{bt_c['winner']:.0f}%",
+              help=f"Out-of-sample on {bt_c['n']} competitive matches the model never saw.")
+    c4.metric("Goal error (MAE)", f"{bt_c['mae']:.2f}",
+              help="Average miss in goals-per-team on unseen matches. Lower is better.")
+
+    st.markdown("**The model's-eye view of the final**")
     st.caption(
-        "Honest read: on head-to-head calls we're about level with a simple Elo "
-        "baseline — football is genuinely hard to predict. The model earns its keep "
-        "in the *scorelines* it rolls, which is what makes the simulation realistic."
+        f"If **{R['winner']}** met **{R['runner']}** on neutral ground, here's the chance "
+        "of every scoreline. The outlined square is the single most likely one — exactly "
+        "what the simulator rolls each game."
     )
-with t2:
-    st.altair_chart(charts.model_vs_market_scatter(R["title"], R["market"], R["ranked"]),
+    st.altair_chart(charts.poisson_heatmap(R["score_grid"], R["winner"], R["runner"]),
                     use_container_width=True)
-    st.caption(
-        "Each dot is a team: our simulated title chance vs the betting market's. On "
-        "the dashed line we agree; above it we're more bullish, below more bearish."
-    )
-with t3:
-    st.altair_chart(charts.feature_importance_bar(M["feature_importance"]),
-                    use_container_width=True)
-    st.caption(
-        "What moves the goals model most, by shuffling each input and watching "
-        "accuracy drop. Team strength dominates, with form and home advantage filling in."
-    )
+
+    t1, t2, t3 = st.tabs(["📈 Track record", "⚖️ Model vs market", "🎛️ What drives it"])
+    with t1:
+        st.markdown(
+            f"We hid every match after **{M['backtest']['cutoff']}**, retrained on the "
+            f"rest, and predicted those **{M['backtest']['test_n']:,}** unseen games."
+        )
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Picked the winner", f"{bt_c['winner']:.0f}%", help="3-way (win/draw/loss) on competitive matches.")
+        m2.metric("Exact scoreline", f"{bt_c['exact']:.0f}%", help="~10% is normal for football.")
+        m3.metric("Goal error (MAE)", f"{bt_c['mae']:.2f}", help="Average goals-per-team miss.")
+        m4.metric("vs. Elo baseline", f"+{bt_c['model2'] - bt_c['elo2']:.1f} pts",
+                  help=f"Model {bt_c['model2']:.0f}% vs Elo {bt_c['elo2']:.0f}% head-to-head.")
+        st.caption(
+            "Honest read: on head-to-head calls we're about level with a simple Elo "
+            "baseline — football is genuinely hard to predict. The model earns its keep "
+            "in the *scorelines* it rolls, which is what makes the simulation realistic."
+        )
+    with t2:
+        st.altair_chart(charts.model_vs_market_scatter(R["title"], R["market"], R["ranked"]),
+                        use_container_width=True)
+        st.caption(
+            "Each dot is a team: our simulated title chance vs the betting market's. On "
+            "the dashed line we agree; above it we're more bullish, below more bearish."
+        )
+    with t3:
+        st.altair_chart(charts.feature_importance_bar(M["feature_importance"]),
+                        use_container_width=True)
+        st.caption(
+            "What moves the goals model most, by shuffling each input and watching "
+            "accuracy drop. Team strength dominates, with form and home advantage filling in."
+        )
 
 # ══════════════════════════════════════════════════════════════════════════════
 # MODIFICATIONS YOU CAN MAKE
 # ══════════════════════════════════════════════════════════════════════════════
-section("Make it yours", "Modifications you can make",
-        "Tune the dials, then re-simulate — every result above updates to match.")
-mc1, mc2 = st.columns(2)
-with mc1:
-    st.slider("📊 Market trust", 0.0, 1.0, 0.5, 0.05, key="ctl_gamma",
-              help="0 = pure football model · 1 = lean hard on live odds · 0.5 is balanced.")
-with mc2:
-    st.select_slider("🎲 Simulations", options=[300, 500, 1000, 2000, 3000], value=1000,
-                     key="ctl_sims", help="More = smoother odds but slower. 1 000 is a good balance.")
-st.multiselect("🤕 Injuries — weaken a team if a star is out", ranked_by_market,
-               default=[], key="ctl_picks")
-for t in st.session_state.get("ctl_picks", []):
-    st.slider(f"{t} availability", 0.80, 1.05, 1.00, 0.01, key=f"av_{t}",
-              help="1.00 = full strength.")
+with st.container(key="sec_mod"):
+    section_header("Make it yours", "Modifications you can make",
+                   "Tune the dials, then re-simulate — every result above updates to match.")
+    mc1, mc2 = st.columns(2)
+    with mc1:
+        st.slider("📊 Market trust", 0.0, 1.0, 0.5, 0.05, key="ctl_gamma",
+                  help="0 = pure football model · 1 = lean hard on live odds · 0.5 is balanced.")
+    with mc2:
+        st.select_slider("🎲 Simulations", options=[300, 500, 1000, 2000, 3000], value=1000,
+                         key="ctl_sims", help="More = smoother odds but slower. 1 000 is a good balance.")
+    st.multiselect("🤕 Injuries — weaken a team if a star is out", ranked_by_market,
+                   default=[], key="ctl_picks")
+    for t in st.session_state.get("ctl_picks", []):
+        st.slider(f"{t} availability", 0.80, 1.05, 1.00, 0.01, key=f"av_{t}",
+                  help="1.00 = full strength.")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CLOSING CTA
 # ══════════════════════════════════════════════════════════════════════════════
-section("Your turn", "Ready to simulate and predict the World Cup?")
-st.button("Simulate", type="primary", key="btn_end", on_click=trigger_simulation)
-st.markdown("<div style='height:48px'></div>", unsafe_allow_html=True)
+with st.container(key="sec_cta"):
+    section_header("Your turn", "Ready to simulate and predict the World Cup?")
+    st.button("Simulate", type="primary", key="btn_end", on_click=trigger_simulation)

@@ -15,6 +15,26 @@ import engine
 
 st.set_page_config(page_title="World Cup 2026 Predictor", page_icon="🏆", layout="wide")
 
+# Press Start 2P is a pixel font — wide and tall. Shrink heading sizes, add
+# breathing room, and let long titles wrap so nothing overflows (esp. mobile).
+st.markdown(
+    """
+    <style>
+      h1, h2, h3, h4 { line-height: 1.5 !important; overflow-wrap: anywhere; }
+      h1 { font-size: 1.7rem !important; }
+      h2 { font-size: 1.15rem !important; }
+      h3 { font-size: 0.95rem !important; }
+      h4 { font-size: 0.8rem !important; }
+      @media (max-width: 760px){
+        h1 { font-size: 1.2rem !important; }
+        h2 { font-size: 0.95rem !important; }
+        h3, h4 { font-size: 0.8rem !important; }
+      }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 # ---- cached heavy bits -------------------------------------------------------
 @st.cache_resource

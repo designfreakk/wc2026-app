@@ -16,28 +16,38 @@ import views
 
 st.set_page_config(page_title="World Cup 2026 Predictor", page_icon="🏆", layout="wide")
 
-# Press Start 2P is a pixel font — wide and tall. Shrink heading sizes, add
-# breathing room, and let long titles wrap so nothing overflows (esp. mobile).
-# Also collapse the empty sidebar rail entirely.
+# getfast.ai-inspired editorial styling: Fraunces serif headings (tight, dark),
+# generous line-height, a single red accent, and a clean tab row. Also collapse
+# the empty sidebar rail entirely.
 st.markdown(
     """
     <style>
       /* hide the sidebar toggle + rail */
       section[data-testid="stSidebar"],
       button[data-testid="collapsedControl"] { display: none !important; }
-      /* pixel-font guard-rails */
-      h1, h2, h3, h4 { line-height: 1.5 !important; overflow-wrap: anywhere; }
-      h1 { font-size: 1.7rem !important; }
-      h2 { font-size: 1.15rem !important; }
-      h3 { font-size: 0.95rem !important; }
-      h4 { font-size: 0.8rem !important; }
+      /* editorial serif headings — large, tight, near-black */
+      h1, h2, h3, h4 { font-family: Fraunces, Georgia, serif !important;
+                       font-weight: 600 !important; letter-spacing: -0.01em;
+                       line-height: 1.18 !important; overflow-wrap: anywhere;
+                       color: #212529; }
+      h1 { font-size: 2.6rem !important; letter-spacing: -0.02em; }
+      h2 { font-size: 1.7rem !important; }
+      h3 { font-size: 1.25rem !important; }
+      h4 { font-size: 1.05rem !important; }
       @media (max-width: 760px){
-        h1 { font-size: 1.2rem !important; }
-        h2 { font-size: 0.95rem !important; }
-        h3, h4 { font-size: 0.8rem !important; }
+        h1 { font-size: 1.9rem !important; }
+        h2 { font-size: 1.35rem !important; }
+        h3 { font-size: 1.1rem !important; }
+        h4 { font-size: 1rem !important; }
       }
-      /* let the tab row wrap instead of overflowing on narrow screens */
-      .stTabs [data-baseweb="tab-list"]{ flex-wrap: wrap; gap: 2px; }
+      /* tabs: airy, underline-accent, wrap on narrow screens */
+      .stTabs [data-baseweb="tab-list"]{ flex-wrap: wrap; gap: 4px;
+            border-bottom: 1px solid #dee2e6; }
+      .stTabs [data-baseweb="tab"]{ font-weight: 500; }
+      /* numbers feel intentional in mono */
+      [data-testid="stMetricValue"]{ font-family: "JetBrains Mono", ui-monospace, monospace; }
+      /* pill-rounded primary button, getfast-style */
+      .stButton > button[kind="primary"]{ border-radius: 3rem; font-weight: 600; }
     </style>
     """,
     unsafe_allow_html=True,

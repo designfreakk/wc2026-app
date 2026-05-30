@@ -7,12 +7,12 @@ import numpy as np
 import pandas as pd
 import altair as alt
 
-# Orange-only palette (Football Meets Data): every mark that carries meaning is a
-# tone of amber/orange; navy + cream/greys stay as the neutral ink & paper.
-_AMBER = "#ff9d00"   # signature accent — bars, highlights, light gradient end
-_BURNT = "#c25e00"   # deep burnt orange — emphasis marks, strong gradient end
-_NAVY = "#01002e"    # neutral ink — text, axes, outlines
-_GRID = "#d8d4c5"    # cream-toned gridlines
+# getfast.ai-inspired palette: a single vivid red carries all meaning; near-black
+# ink and cool greys stay as the neutral text & paper on a white canvas.
+_AMBER = "#fc0017"   # signature red — bars, highlights, light gradient end
+_BURNT = "#c5394e"   # deeper red — emphasis marks, strong gradient end
+_NAVY = "#212529"    # neutral ink — text, axes, outlines
+_GRID = "#e9ecef"    # cool-grey gridlines
 
 
 def poisson_heatmap(grid, home, away, kmax=6):
@@ -34,7 +34,7 @@ def poisson_heatmap(grid, home, away, kmax=6):
     )
     cells = base.mark_rect().encode(
         color=alt.Color("p:Q", title="% chance",
-                        scale=alt.Scale(scheme="oranges"), legend=alt.Legend(format=".0f")),
+                        scale=alt.Scale(scheme="reds"), legend=alt.Legend(format=".0f")),
         tooltip=[alt.Tooltip("hg:O", title=f"{home}"), alt.Tooltip("ag:O", title=f"{away}"),
                  alt.Tooltip("p:Q", title="% chance", format=".1f")],
     )
@@ -77,15 +77,15 @@ def model_vs_market_scatter(title_probs, market_probs, teams, top=18):
 
 
 def _orange_css(v):
-    """Inline-CSS amber shade for a 0-100 percentage — a matplotlib-free stand-in
+    """Inline-CSS red shade for a 0-100 percentage — a matplotlib-free stand-in
     for Styler.background_gradient (matplotlib isn't a runtime dependency).
-    Pale cream at 0% deepening to full amber at 100%."""
+    Near-white at 0% deepening to full red at 100%."""
     try:
         f = max(0.0, min(1.0, float(v) / 100.0))
     except (TypeError, ValueError):
         return ""
-    txt = "#ffffff" if f > 0.62 else "#01002e"
-    return f"background-color: rgba(255,157,0,{0.06 + 0.86 * f:.3f}); color:{txt};"
+    txt = "#ffffff" if f > 0.55 else "#212529"
+    return f"background-color: rgba(252,0,23,{0.05 + 0.85 * f:.3f}); color:{txt};"
 
 
 _REACH_COLS = [("Round of 32", "Advance"), ("Round of 16", "Round of 16"),

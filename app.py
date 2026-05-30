@@ -36,6 +36,8 @@ st.markdown(
         h2 { font-size: 0.95rem !important; }
         h3, h4 { font-size: 0.8rem !important; }
       }
+      /* let the tab row wrap instead of overflowing on narrow screens */
+      .stTabs [data-baseweb="tab-list"]{ flex-wrap: wrap; gap: 2px; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -146,8 +148,8 @@ M = R["meta"]
 st.divider()
 
 # ---- content tabs ------------------------------------------------------------
-tab_pred, tab_group, tab_model, tab_details = st.tabs(
-    ["🏆 Predictions", "📊 Group Stage", "🔬 How it works", "📋 Details"]
+tab_pred, tab_race, tab_group, tab_model, tab_details = st.tabs(
+    ["🏆 Predictions", "🥇 Title Race", "📊 Group Stage", "🔬 How it works", "📋 Details"]
 )
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -164,6 +166,8 @@ with tab_pred:
     # back to Streamlit (see bracket.py), so it fits any window with no scrollbar.
     components.html(bracket.render(R["ko"], height=640), height=690, scrolling=False)
 
+# ══════════════════════════════════════════════════════════════════════════════
+with tab_race:
     st.subheader("Title race — chance of winning the World Cup")
     top = R["ranked"][:12]
     chart_df = pd.DataFrame(

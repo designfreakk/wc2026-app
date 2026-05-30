@@ -174,26 +174,35 @@ def render(ko, height=620):
         var wrap=document.querySelector('.wrap'),
             fit=document.querySelector('.bracket-fit'),
             br=document.querySelector('.bracket');
-        if(br && br.offsetParent!==null){            // wide layout → scale to fit
+        if(!wrap||!fit||!br) return;
+        if(br.offsetParent!==null){                  // wide layout → scale to fit
           var natW=br.offsetWidth || 1100, natH=__H__,
-              availW=Math.max(0, wrap.clientWidth-8),
-              s=Math.min(1, availW/natW);
-          br.style.transformOrigin='top left';
-          br.style.transform='scale('+s+')';
-          fit.style.width=(natW*s)+'px';
-          fit.style.height=(natH*s)+'px';
-          fit.style.margin='0 auto';
-        } else if(fit){                              // stacked mobile → no scaling
+              availW=Math.max(0, wrap.clientWidth-8);
+          if(availW>0){
+            var s=Math.min(1, availW/natW);
+            br.style.transformOrigin='top left';
+            br.style.transform='scale('+s+')';
+            fit.style.width=(natW*s)+'px';
+            fit.style.height=(natH*s)+'px';
+            fit.style.margin='0 auto';
+          }
+        } else {                                     // stacked mobile → no scaling
           fit.style.width=''; fit.style.height=''; fit.style.margin='';
-          if(br){ br.style.transform=''; }
+          br.style.transform='';
         }
         sendHeight(document.documentElement.scrollHeight+4);
+      }
+      // The iframe's final width is applied AFTER first paint and without firing a
+      // window 'resize', so watch the document for size changes and re-fit then.
+      if(window.ResizeObserver){
+        try{ new ResizeObserver(fitBracket).observe(document.documentElement); }catch(e){}
       }
       window.addEventListener('resize', fitBracket);
       window.addEventListener('load', fitBracket);
       if(document.readyState==='loading'){
         document.addEventListener('DOMContentLoaded', fitBracket);
       } else { fitBracket(); }
+      setTimeout(fitBracket, 60); setTimeout(fitBracket, 300);  // after fonts/flags settle
     </script>
     """.replace("__H__", str(height))
     html = ('<meta charset="utf-8">'

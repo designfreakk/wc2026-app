@@ -49,17 +49,21 @@ st.markdown(
       .topbar .brand b{ color:#fc0017; font-weight:700; }
       .topbar .nav{ color:#6c757d; font-weight:500; font-size:.95rem; }
 
-      /* full-bleed dark hero band; fills ~one screen, content centered */
-      .hero-band{ width:100vw; margin-left:calc(50% - 50vw); background:#0e0e10;
-                  min-height:82vh; display:flex; flex-direction:column; justify-content:center; align-items:center;
-                  text-align:center; padding:90px 16px 170px; margin-bottom:-120px; box-sizing:border-box;
-                  scroll-snap-align:start; }
-      .hero-band .eyebrow{ color:#fc0017; font-weight:700; text-transform:uppercase;
+      /* full-bleed dark hero SECTION — holds the headline, the centered Simulate
+         button, and the bracket card floating on the dark band (getfast style) */
+      .st-key-hero{ width:100vw; margin-left:calc(50% - 50vw); background:#0e0e10;
+                  min-height:100vh; display:flex; flex-direction:column; align-items:center;
+                  justify-content:center; text-align:center; scroll-snap-align:start;
+                  padding:8vh max(22px, calc(50% - 480px)); box-sizing:border-box; }
+      .hero-copy{ margin-bottom:4px; }
+      .hero-copy .eyebrow{ color:#fc0017; font-weight:700; text-transform:uppercase;
                   letter-spacing:.26em; font-size:.82rem; margin-bottom:22px; }
-      .hero-band h1{ color:#ffffff!important; font-size:4.6rem; line-height:1.02; letter-spacing:-0.04em;
+      .st-key-hero h1{ color:#ffffff!important; font-size:4.6rem; line-height:1.02; letter-spacing:-0.04em;
                   margin:0 auto; max-width:15ch; font-weight:600; }
-      .hero-band .sub{ color:#aeb2ba; font-size:1.25rem; line-height:1.55; max-width:46ch; margin:24px auto 0; }
-      @media (max-width:760px){ .hero-band h1{ font-size:2.6rem; } .hero-band{ min-height:90vh; padding-bottom:140px; margin-bottom:-100px; } }
+      .hero-copy .sub{ color:#aeb2ba; font-size:1.25rem; line-height:1.55; max-width:46ch; margin:24px auto 0; }
+      .hero-cap{ color:#9aa1ab; font-size:.92rem; line-height:1.5; max-width:62ch; margin:14px auto 0; }
+      .hero-cap b{ color:#e9ecef; }
+      @media (max-width:760px){ .st-key-hero h1{ font-size:2.6rem; } }
 
       /* red pill buttons (primary) — getfast colour, centered */
       .stButton{ display:flex; justify-content:center; width:100%; }
@@ -234,19 +238,6 @@ st.markdown(
     '</div>',
     unsafe_allow_html=True,
 )
-st.markdown(
-    '<div class="hero-band">'
-    '<div class="eyebrow">World Cup 2026</div>'
-    '<h1>Simulate the World&nbsp;Cup.</h1>'
-    '<div class="sub">A football model blended with the live betting market plays '
-    'all 104 matches — groups to final — thousands of times, so you can see who '
-    'really lifts the trophy.</div>'
-    '</div>',
-    unsafe_allow_html=True,
-)
-
-st.button("Simulate", type="primary", key="btn_hero", on_click=trigger_simulation)
-
 def section_header(eyebrow, title, sub=""):
     st.markdown(
         f'<div class="sec"><div class="eyebrow">{eyebrow}</div>'
@@ -255,14 +246,33 @@ def section_header(eyebrow, title, sub=""):
     )
 
 
-# ---- the framed table: a representative bracket ------------------------------
-with st.container(key="sec_pred"):
-    components.html(bracket.render(R["ko"], height=640), height=700, scrolling=False)
-    st.caption(
-        f"One plausible run all the way to the final, where **{R['winner']}** lift the "
-        f"trophy ({R['title'][R['winner']]*100:.1f}% of {R['n_sims']:,} simulations). "
-        "Hit Simulate again — the path changes every time."
+# ---- HERO: headline + centered Simulate button + the bracket card on dark ----
+with st.container(key="hero"):
+    st.markdown(
+        '<div class="hero-copy">'
+        '<div class="eyebrow">World Cup 2026</div>'
+        '<h1>Simulate the World&nbsp;Cup.</h1>'
+        '<div class="sub">A football model blended with the live betting market plays '
+        'all 104 matches — groups to final — thousands of times, so you can see who '
+        'really lifts the trophy.</div>'
+        '</div>',
+        unsafe_allow_html=True,
     )
+    st.button("Simulate", type="primary", key="btn_hero", on_click=trigger_simulation)
+    components.html(bracket.render(R["ko"], height=640), height=700, scrolling=False)
+    st.markdown(
+        f'<div class="hero-cap">One plausible run all the way to the final, where '
+        f'<b>{R["winner"]}</b> lift the trophy ({R["title"][R["winner"]]*100:.1f}% of '
+        f'{R["n_sims"]:,} simulations). Hit Simulate again — the path changes every time.</div>',
+        unsafe_allow_html=True,
+    )
+
+
+# ---- explore-more results (title race / group stage / details) ---------------
+with st.container(key="sec_pred"):
+    section_header("Dig deeper", "Explore the full results",
+                   "Title odds for every team, group-stage escape rates, and the "
+                   "match-by-match knockout path behind the bracket above.")
     with st.expander("Explore more results — title race, group stage, full details"):
         t_race, t_group, t_details = st.tabs(["🥇 Title Race", "📊 Group Stage", "📋 Details"])
         with t_race:

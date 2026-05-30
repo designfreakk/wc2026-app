@@ -96,13 +96,13 @@ def render(ko, height=620):
         champ = f'<div class="champ">🏆 {w}</div>'
     css = """
     <style>
-      .wrap{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#fff;
-            overflow-x:auto;padding:8px 4px;}
+      .wrap{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f5f1e8;
+            overflow-x:auto;padding:8px 4px;color:#01002e;}
       .bracket{display:flex;align-items:stretch;min-width:1100px;height:__H__px;}
       .half{display:flex;flex:1;}
       .center{display:flex;flex-direction:column;align-items:center;
               justify-content:center;padding:0 10px;min-width:150px;}
-      .champ{margin-top:10px;font-weight:700;font-size:15px;color:#0b7;}
+      .champ{margin-top:10px;font-weight:700;font-size:15px;color:#00bb7f;}
       .node{display:flex;align-items:stretch;flex:1;}
       .children{display:flex;flex-direction:column;justify-content:center;
                 position:relative;flex:1;}
@@ -120,12 +120,12 @@ def render(ko, height=620):
       /* the very first column (R32 leaves) has no incoming line on the outer side */
       .match{background:#fff;border:1px solid #e5e7eb;border-radius:8px;
              box-shadow:0 1px 2px rgba(0,0,0,.06);min-width:118px;overflow:hidden;}
-      .match.f{min-width:140px;border-color:#0b7;box-shadow:0 2px 8px rgba(0,180,120,.25);}
+      .match.f{min-width:140px;border-color:#ff9d00;box-shadow:0 2px 8px rgba(255,157,0,.30);}
       .team{display:flex;align-items:center;gap:6px;padding:4px 7px;font-size:12px;
             border-bottom:1px solid #f0f1f3;}
       .team:last-child{border-bottom:0;}
       .team .name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-      .team.won{font-weight:700;color:#111;}
+      .team.won{font-weight:700;color:#01002e;}
       .team.lost{color:#9aa1ab;}
       .team.lost .flag{filter:grayscale(.7);opacity:.6;}
       .flag{width:20px;height:20px;border-radius:50%;object-fit:cover;

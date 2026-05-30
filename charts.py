@@ -7,8 +7,11 @@ import numpy as np
 import pandas as pd
 import altair as alt
 
-_GREEN = "#0b7"
-_GRID = "#e5e7eb"
+# Football Meets Data palette
+_GREEN = "#00bb7f"   # positive / probability
+_AMBER = "#ff9d00"   # signature accent / highlight
+_NAVY = "#01002e"    # primary data marks / text
+_GRID = "#d8d4c5"    # cream-toned gridlines
 
 
 def poisson_heatmap(grid, home, away, kmax=6):
@@ -36,10 +39,10 @@ def poisson_heatmap(grid, home, away, kmax=6):
     )
     text = base.mark_text(fontSize=11).encode(
         text=alt.Text("p:Q", format=".0f"),
-        color=alt.condition("datum.p > 6", alt.value("white"), alt.value("#475467")),
+        color=alt.condition("datum.p > 6", alt.value("white"), alt.value("#5b5b73")),
     )
     outline = base.transform_filter("datum.top").mark_rect(
-        fill=None, stroke=_GREEN, strokeWidth=2.5)
+        fill=None, stroke=_AMBER, strokeWidth=2.5)
     return (cells + text + outline).properties(height=300)
 
 
@@ -57,7 +60,7 @@ def model_vs_market_scatter(title_probs, market_probs, teams, top=18):
     hi = max(df["market"].max(), df["model"].max()) * 1.1 + 1
     diag = pd.DataFrame({"x": [0, hi], "y": [0, hi]})
     line = alt.Chart(diag).mark_line(strokeDash=[5, 5], color=_GRID).encode(x="x:Q", y="y:Q")
-    pts = alt.Chart(df).mark_circle(size=110, color=_GREEN, opacity=0.85).encode(
+    pts = alt.Chart(df).mark_circle(size=110, color=_NAVY, opacity=0.85).encode(
         x=alt.X("market:Q", title="Betting market title chance (%)",
                 scale=alt.Scale(domain=[0, hi])),
         y=alt.Y("model:Q", title="Our model title chance (%)",
@@ -66,7 +69,7 @@ def model_vs_market_scatter(title_probs, market_probs, teams, top=18):
                  alt.Tooltip("market:Q", title="Market %", format=".1f"),
                  alt.Tooltip("model:Q", title="Model %", format=".1f")],
     )
-    labels = alt.Chart(df).mark_text(align="left", dx=7, fontSize=10, color="#475467").encode(
+    labels = alt.Chart(df).mark_text(align="left", dx=7, fontSize=10, color="#5b5b73").encode(
         x="market:Q", y="model:Q", text="team:N")
     return (line + pts + labels).properties(height=340)
 
@@ -78,8 +81,8 @@ def _green_css(v):
         f = max(0.0, min(1.0, float(v) / 100.0))
     except (TypeError, ValueError):
         return ""
-    txt = "#ffffff" if f > 0.55 else "#1a1a1a"
-    return f"background-color: rgba(11,183,119,{0.06 + 0.82 * f:.3f}); color:{txt};"
+    txt = "#ffffff" if f > 0.55 else "#01002e"
+    return f"background-color: rgba(0,187,127,{0.06 + 0.82 * f:.3f}); color:{txt};"
 
 
 _REACH_COLS = [("Round of 32", "Advance"), ("Round of 16", "Round of 16"),
@@ -131,7 +134,7 @@ def group_finish_table(agg):
 def feature_importance_bar(items):
     """Horizontal bar of which inputs move the goals model most (relative)."""
     df = pd.DataFrame(items)
-    return alt.Chart(df).mark_bar(color=_GREEN, cornerRadiusEnd=3).encode(
+    return alt.Chart(df).mark_bar(color=_AMBER, cornerRadiusEnd=3).encode(
         x=alt.X("importance:Q", title="Relative influence", axis=alt.Axis(format=".0%")),
         y=alt.Y("feature:N", title=None, sort="-x"),
         tooltip=[alt.Tooltip("feature:N", title="Input"),

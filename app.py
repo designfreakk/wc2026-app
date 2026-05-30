@@ -160,7 +160,9 @@ with tab_pred:
         f"One plausible run all the way to the final, where {R['winner']} lift the "
         "trophy. Tweak the controls and run it again — the path changes every time."
     )
-    components.html(bracket.render(R["ko"], height=640), height=690, scrolling=True)
+    # Bracket scales itself to fit the iframe width and reports its true height
+    # back to Streamlit (see bracket.py), so it fits any window with no scrollbar.
+    components.html(bracket.render(R["ko"], height=640), height=690, scrolling=False)
 
     st.subheader("Title race — chance of winning the World Cup")
     top = R["ranked"][:12]

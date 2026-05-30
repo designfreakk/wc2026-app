@@ -97,8 +97,11 @@ def render(ko, height=620):
     css = """
     <style>
       .wrap{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f5f1e8;
-            overflow-x:auto;padding:8px 4px;color:#01002e;}
-      .bracket{display:flex;align-items:stretch;min-width:1100px;height:__H__px;}
+            overflow:hidden;padding:8px 4px;color:#01002e;}
+      /* JS scales .bracket to fit; .bracket-fit reserves the *scaled* box so
+         there's no overflow (hence no horizontal scrollbar) and no dead space. */
+      .bracket-fit{}
+      .bracket{display:flex;align-items:stretch;width:1100px;min-width:1100px;height:__H__px;}
       .half{display:flex;flex:1;}
       .center{display:flex;flex-direction:column;align-items:center;
               justify-content:center;padding:0 10px;min-width:150px;}
@@ -157,11 +160,47 @@ def render(ko, height=620):
         if cards:
             rounds += f'<div class="rnd"><div class="rnd-title">{name}</div>{cards}</div>'
     rounds = f'<div class="rounds">{champ}{rounds}</div>'
+    # Fit-to-width: scale the fixed-width bracket down so it always fits the
+    # iframe (never up past natural size), and tell Streamlit the true height so
+    # the iframe resizes with it — no horizontal scrollbar, no wasted space.
+    script = """
+    <script>
+      function sendHeight(h){
+        try{ window.parent.postMessage(
+          {isStreamlitMessage:true, type:"streamlit:setFrameHeight", height:Math.ceil(h)}, "*"); }
+        catch(e){}
+      }
+      function fitBracket(){
+        var wrap=document.querySelector('.wrap'),
+            fit=document.querySelector('.bracket-fit'),
+            br=document.querySelector('.bracket');
+        if(br && br.offsetParent!==null){            // wide layout → scale to fit
+          var natW=br.offsetWidth || 1100, natH=__H__,
+              availW=Math.max(0, wrap.clientWidth-8),
+              s=Math.min(1, availW/natW);
+          br.style.transformOrigin='top left';
+          br.style.transform='scale('+s+')';
+          fit.style.width=(natW*s)+'px';
+          fit.style.height=(natH*s)+'px';
+          fit.style.margin='0 auto';
+        } else if(fit){                              // stacked mobile → no scaling
+          fit.style.width=''; fit.style.height=''; fit.style.margin='';
+          if(br){ br.style.transform=''; }
+        }
+        sendHeight(document.documentElement.scrollHeight+4);
+      }
+      window.addEventListener('resize', fitBracket);
+      window.addEventListener('load', fitBracket);
+      if(document.readyState==='loading'){
+        document.addEventListener('DOMContentLoaded', fitBracket);
+      } else { fitBracket(); }
+    </script>
+    """.replace("__H__", str(height))
     html = ('<meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width, initial-scale=1">'
-            + css + '<div class="wrap"><div class="bracket">'
+            + css + '<div class="wrap"><div class="bracket-fit"><div class="bracket">'
             f'<div class="half lh">{left}</div>'
             f'<div class="center"><div class="rlabel">FINAL</div>{final}{champ}</div>'
             f'<div class="half rh">{right}</div>'
-            f'</div>{rounds}</div>')
+            f'</div></div>{rounds}</div>' + script)
     return html

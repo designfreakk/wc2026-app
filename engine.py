@@ -163,11 +163,21 @@ def representative_bracket(gf, ks, pair, want=None, seed=99, max_tries=600):
     return last
 
 
-def run(n, gf, ks, pair, seed=0, collect=False):
+def run(n, gf, ks, pair, seed=0, collect=False, progress=None):
+    """Simulate n tournaments. Returns (champ_counter, group_recs, ko_recs, samples).
+
+    `samples` maps each champion seen -> one full ko_matches bracket where they won,
+    so the app can show a representative bracket for the favourite without a second
+    search loop. `progress(frac)` (optional) is called ~20× for a UI progress bar.
+    """
     rng = np.random.default_rng(seed); champ = Counter(); gs = defaultdict(list); kk = defaultdict(list)
-    for _ in range(n):
+    samples = {}
+    step = max(1, n // 20)
+    for i in range(n):
         r = simulate_once(rng, gf, ks, pair); champ[r["champion"]] += 1
+        if r["champion"] not in samples: samples[r["champion"]] = r["ko_matches"]
         if collect:
             for mid, rec in r["group_matches"].items(): gs[mid].append(rec)
             for mid, rec in r["ko_matches"].items(): kk[mid].append(rec)
-    return champ, gs, kk
+        if progress is not None and (i + 1) % step == 0: progress((i + 1) / n)
+    return champ, gs, kk, samples

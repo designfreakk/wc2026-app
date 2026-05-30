@@ -31,23 +31,25 @@ def model_probs(n_pass1):
     """Pass 1: pure-model title probabilities (no market, no injuries)."""
     teams, base, meta, gf, ks = get_artifacts()
     pair = engine.make_pair(base, {t: 1.0 for t in teams}, {})
-    champ, _, _ = engine.run(n_pass1, gf, ks, pair, seed=0)
+    champ, _, _, _ = engine.run(n_pass1, gf, ks, pair, seed=0)
     tot = sum(champ.values()) or 1
     return {t: champ.get(t, 0) / tot for t in teams}
 
 
-def simulate(gamma, n_sims, avail, nonce):
+def simulate(gamma, n_sims, avail, nonce, progress=None):
     """Run the two-pass model and stash everything for both pages."""
     teams, base, meta, gf, ks = get_artifacts()
     market, market_src = get_market(teams)
-    mp = model_probs(min(n_sims, 2000))
+    mp = model_probs(600)  # pass 1: cheap, cached; enough to set market multipliers
     mult = engine.calibrate(market, mp, gamma=gamma)
     pair = engine.make_pair(base, mult, avail)
-    champ, gs, kk = engine.run(n_sims, gf, ks, pair, seed=1 + nonce, collect=True)
+    champ, gs, kk, samples = engine.run(
+        n_sims, gf, ks, pair, seed=1 + nonce, collect=True, progress=progress)
     tot = sum(champ.values()) or 1
     title = {t: champ.get(t, 0) / tot for t in teams}
     ranked = sorted(teams, key=lambda t: title[t], reverse=True)
-    samp = engine.representative_bracket(gf, ks, pair, want=ranked[0], seed=99 + nonce)
+    # representative bracket: a run where the favourite won (captured during the run)
+    ko = samples.get(ranked[0]) or next(iter(samples.values()))
     hda = {"home": 0, "away": 0, "draw": 0}
     for recs in gs.values():
         for _, _, res in recs:
@@ -55,7 +57,7 @@ def simulate(gamma, n_sims, avail, nonce):
     st.session_state["results"] = {
         "mp": mp, "market": market, "market_src": market_src, "title": title,
         "ranked": ranked, "winner": ranked[0], "runner": ranked[1],
-        "ko": samp["ko_matches"], "hda": hda, "n_sims": n_sims, "gamma": gamma,
+        "ko": ko, "hda": hda, "n_sims": n_sims, "gamma": gamma,
         "avail": dict(avail), "meta": meta,
     }
 
@@ -71,8 +73,8 @@ gamma = st.sidebar.slider(
     help="0 = pure football model. 1 = lean hard on live odds. 0.5 is balanced.",
 )
 n_sims = st.sidebar.select_slider(
-    "Tournaments to simulate", options=[500, 1000, 2000, 3000, 5000], value=2000,
-    help="More = smoother odds but slower. 2000 ≈ 10 seconds.",
+    "Tournaments to simulate", options=[300, 500, 1000, 2000, 3000], value=1000,
+    help="More = smoother odds but slower. 1000 is a good balance.",
 )
 st.sidebar.subheader("🤕 Injuries")
 st.sidebar.caption("Knock a team down a notch if a star is out. 1.00 = full strength.")
@@ -86,8 +88,10 @@ run = st.sidebar.button("▶️ Run again", type="primary", use_container_width=
 sig = (gamma, n_sims, tuple(sorted(avail.items())))
 if run or st.session_state.get("results") is None or st.session_state.get("sig") != sig:
     st.session_state["nonce"] = st.session_state.get("nonce", 0) + 1
-    with st.spinner(f"Simulating {n_sims:,} tournaments…"):
-        simulate(gamma, n_sims, avail, st.session_state["nonce"])
+    bar = st.progress(0.0, text=f"Simulating {n_sims:,} tournaments…")
+    simulate(gamma, n_sims, avail, st.session_state["nonce"],
+             progress=lambda f: bar.progress(f, text=f"Simulating {n_sims:,} tournaments… {int(f*100)}%"))
+    bar.empty()
     st.session_state["sig"] = sig
 
 R = st.session_state["results"]

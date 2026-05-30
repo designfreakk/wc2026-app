@@ -7,10 +7,11 @@ import numpy as np
 import pandas as pd
 import altair as alt
 
-# Football Meets Data palette
-_GREEN = "#00bb7f"   # positive / probability
-_AMBER = "#ff9d00"   # signature accent / highlight
-_NAVY = "#01002e"    # primary data marks / text
+# Orange-only palette (Football Meets Data): every mark that carries meaning is a
+# tone of amber/orange; navy + cream/greys stay as the neutral ink & paper.
+_AMBER = "#ff9d00"   # signature accent — bars, highlights, light gradient end
+_BURNT = "#c25e00"   # deep burnt orange — emphasis marks, strong gradient end
+_NAVY = "#01002e"    # neutral ink — text, axes, outlines
 _GRID = "#d8d4c5"    # cream-toned gridlines
 
 
@@ -33,7 +34,7 @@ def poisson_heatmap(grid, home, away, kmax=6):
     )
     cells = base.mark_rect().encode(
         color=alt.Color("p:Q", title="% chance",
-                        scale=alt.Scale(scheme="greens"), legend=alt.Legend(format=".0f")),
+                        scale=alt.Scale(scheme="oranges"), legend=alt.Legend(format=".0f")),
         tooltip=[alt.Tooltip("hg:O", title=f"{home}"), alt.Tooltip("ag:O", title=f"{away}"),
                  alt.Tooltip("p:Q", title="% chance", format=".1f")],
     )
@@ -41,8 +42,9 @@ def poisson_heatmap(grid, home, away, kmax=6):
         text=alt.Text("p:Q", format=".0f"),
         color=alt.condition("datum.p > 6", alt.value("white"), alt.value("#5b5b73")),
     )
+    # navy outline so the modal cell pops against the orange scale
     outline = base.transform_filter("datum.top").mark_rect(
-        fill=None, stroke=_AMBER, strokeWidth=2.5)
+        fill=None, stroke=_NAVY, strokeWidth=2.5)
     return (cells + text + outline).properties(height=300)
 
 
@@ -60,7 +62,7 @@ def model_vs_market_scatter(title_probs, market_probs, teams, top=18):
     hi = max(df["market"].max(), df["model"].max()) * 1.1 + 1
     diag = pd.DataFrame({"x": [0, hi], "y": [0, hi]})
     line = alt.Chart(diag).mark_line(strokeDash=[5, 5], color=_GRID).encode(x="x:Q", y="y:Q")
-    pts = alt.Chart(df).mark_circle(size=110, color=_NAVY, opacity=0.85).encode(
+    pts = alt.Chart(df).mark_circle(size=110, color=_BURNT, opacity=0.85).encode(
         x=alt.X("market:Q", title="Betting market title chance (%)",
                 scale=alt.Scale(domain=[0, hi])),
         y=alt.Y("model:Q", title="Our model title chance (%)",
@@ -74,15 +76,16 @@ def model_vs_market_scatter(title_probs, market_probs, teams, top=18):
     return (line + pts + labels).properties(height=340)
 
 
-def _green_css(v):
-    """Inline-CSS green shade for a 0-100 percentage — a matplotlib-free stand-in
-    for Styler.background_gradient (matplotlib isn't a runtime dependency)."""
+def _orange_css(v):
+    """Inline-CSS amber shade for a 0-100 percentage — a matplotlib-free stand-in
+    for Styler.background_gradient (matplotlib isn't a runtime dependency).
+    Pale cream at 0% deepening to full amber at 100%."""
     try:
         f = max(0.0, min(1.0, float(v) / 100.0))
     except (TypeError, ValueError):
         return ""
-    txt = "#ffffff" if f > 0.55 else "#01002e"
-    return f"background-color: rgba(0,187,127,{0.06 + 0.82 * f:.3f}); color:{txt};"
+    txt = "#ffffff" if f > 0.62 else "#01002e"
+    return f"background-color: rgba(255,157,0,{0.06 + 0.86 * f:.3f}); color:{txt};"
 
 
 _REACH_COLS = [("Round of 32", "Advance"), ("Round of 16", "Round of 16"),
@@ -92,7 +95,7 @@ _REACH_COLS = [("Round of 32", "Advance"), ("Round of 16", "Round of 16"),
 
 def advancement_table(agg, ranked, top=24):
     """FiveThirtyEight-style 'how far does each team go' table: one row per team,
-    columns = chance of reaching each knockout round, shaded on a green gradient.
+    columns = chance of reaching each knockout round, shaded on an amber gradient.
     Returns a pandas Styler ready for st.dataframe."""
     n = agg["n"] or 1
     reach = agg["reach"]
@@ -104,7 +107,7 @@ def advancement_table(agg, ranked, top=24):
     cols = [label for _, label in _REACH_COLS]
     return (df.style
             .format("{:.0f}%")
-            .map(_green_css, subset=cols))
+            .map(_orange_css, subset=cols))
 
 
 def group_finish_table(agg):
@@ -128,7 +131,7 @@ def group_finish_table(agg):
     return (df.style
             .hide(axis="index")
             .format({c: "{:.0f}%" for c in pct})
-            .map(_green_css, subset=pct))
+            .map(_orange_css, subset=pct))
 
 
 def feature_importance_bar(items):

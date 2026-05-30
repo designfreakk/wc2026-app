@@ -105,7 +105,7 @@ def render(ko, height=620):
       .half{display:flex;flex:1;}
       .center{display:flex;flex-direction:column;align-items:center;
               justify-content:center;padding:0 10px;min-width:150px;}
-      .champ{margin-top:10px;font-weight:700;font-size:15px;color:#00bb7f;}
+      .champ{margin-top:10px;font-weight:700;font-size:15px;color:#c25e00;}
       .node{display:flex;align-items:stretch;flex:1;}
       .children{display:flex;flex-direction:column;justify-content:center;
                 position:relative;flex:1;}

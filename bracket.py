@@ -109,6 +109,9 @@ def render(ko, height=620):
       .center{display:flex;flex-direction:column;align-items:center;
               justify-content:center;padding:0 10px;min-width:150px;}
       .champ{margin-top:10px;font-weight:700;font-size:15px;color:#fc0017;}
+      /* center 'FINAL' label — match the round-title style used elsewhere */
+      .rlabel{margin:0 0 8px;font-size:13px;font-weight:700;text-transform:uppercase;
+              letter-spacing:.04em;color:#475467;}
       .node{display:flex;align-items:stretch;flex:1;}
       .children{display:flex;flex-direction:column;justify-content:center;
                 position:relative;flex:1;}

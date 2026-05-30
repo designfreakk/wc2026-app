@@ -137,6 +137,46 @@ def simulate(gamma, n_sims, avail, nonce, progress=None):
     }
 
 
+def live_race_html(champ, frac, n_sims, top=8):
+    """A getfast-styled 'live title race' card: top teams by running win-count,
+    red bars sized to the current leader, updated as the sim accumulates."""
+    done = sum(champ.values()) or 1
+    leaders = champ.most_common(top)
+    lead = leaders[0][1] if leaders else 1
+    rows = ""
+    for rank, (team, wins) in enumerate(leaders, 1):
+        pct = wins / done * 100
+        w = max(4, wins / lead * 100)
+        code = bracket.ISO.get(team)
+        flag = (f'<img src="https://flagcdn.com/w40/{code}.png" '
+                f'style="width:20px;height:20px;border-radius:50%;object-fit:cover;'
+                f'border:1px solid #e5e7eb;flex:none;">' if code else
+                '<span style="width:20px;height:20px;border-radius:50%;background:#eef0f3;flex:none;"></span>')
+        rows += (
+            f'<div style="display:flex;align-items:center;gap:10px;margin:7px 0;">'
+            f'<span style="width:18px;color:#9aa1ab;font-size:.85rem;font-variant-numeric:tabular-nums;">{rank}</span>'
+            f'{flag}'
+            f'<span style="width:108px;font-weight:600;font-size:.92rem;color:#212529;white-space:nowrap;'
+            f'overflow:hidden;text-overflow:ellipsis;">{team}</span>'
+            f'<span style="flex:1;height:14px;background:#f1f3f5;border-radius:7px;overflow:hidden;">'
+            f'<span style="display:block;height:100%;width:{w:.1f}%;border-radius:7px;'
+            f'background:linear-gradient(90deg,#fc0017,#ff5d4d);transition:width .25s ease;"></span></span>'
+            f'<span style="width:46px;text-align:right;font-weight:700;font-size:.9rem;'
+            f'color:#fc0017;font-variant-numeric:tabular-nums;">{pct:.1f}%</span>'
+            f'</div>'
+        )
+    return (
+        '<div style="max-width:560px;margin:0 auto;padding:20px 22px;background:#fff;'
+        'border:1px solid #e9ecef;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.10);'
+        'font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;">'
+        '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">'
+        '<span style="font-weight:700;font-size:1.05rem;color:#212529;">🏆 Live title race</span>'
+        f'<span style="color:#6c757d;font-size:.85rem;">{done:,} / {n_sims:,} simulated</span></div>'
+        f'{rows}'
+        '</div>'
+    )
+
+
 teams, base, meta, gf, ks = get_artifacts()
 market, market_src = get_market(teams)
 ranked_by_market = sorted(teams, key=lambda t: market.get(t, 0), reverse=True)
@@ -156,9 +196,15 @@ sig = (gamma, n_sims, tuple(sorted(avail.items())))
 if force or st.session_state.get("results") is None or st.session_state.get("sig") != sig:
     st.session_state["nonce"] = st.session_state.get("nonce", 0) + 1
     bar = st.progress(0.0, text=f"Simulating {n_sims:,} tournaments…")
-    simulate(gamma, n_sims, avail, st.session_state["nonce"],
-             progress=lambda f: bar.progress(f, text=f"Simulating {n_sims:,} tournaments… {int(f*100)}%"))
+    race = st.empty()
+
+    def _tick(f, champ):
+        bar.progress(f, text=f"Simulating {n_sims:,} tournaments… {int(f*100)}%")
+        race.markdown(live_race_html(champ, f, n_sims), unsafe_allow_html=True)
+
+    simulate(gamma, n_sims, avail, st.session_state["nonce"], progress=_tick)
     bar.empty()
+    race.empty()
     st.session_state["sig"] = sig
 
 R = st.session_state["results"]

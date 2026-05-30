@@ -198,7 +198,9 @@ def run(n, gf, ks, pair, seed=0, collect=False, progress=None):
         agg["reach"][team]["Champion"] -> times that team won it all
         agg["finish"][team][pos]   -> times that team finished 1st/2nd/3rd/4th in its group
         agg["group"][team]         -> the team's group letter
-    `progress(frac)` (optional) is called ~20x for a UI progress bar.
+    `progress(frac, champ)` (optional) is called ~20x for a UI progress bar; it
+    receives the completed fraction and the live champion Counter so the caller
+    can animate a running title race.
     """
     rng = np.random.default_rng(seed); champ = Counter(); gs = defaultdict(list); kk = defaultdict(list)
     samples = {}
@@ -215,6 +217,6 @@ def run(n, gf, ks, pair, seed=0, collect=False, progress=None):
         if collect:
             for mid, rec in r["group_matches"].items(): gs[mid].append(rec)
             for mid, rec in r["ko_matches"].items(): kk[mid].append(rec)
-        if progress is not None and (i + 1) % step == 0: progress((i + 1) / n)
+        if progress is not None and (i + 1) % step == 0: progress((i + 1) / n, champ)
     agg = {"reach": reach, "finish": finish, "group": team_group, "n": n}
     return champ, gs, kk, samples, agg

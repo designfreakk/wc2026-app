@@ -101,7 +101,10 @@ def render(ko, height=620):
       /* JS scales .bracket to fit; .bracket-fit reserves the *scaled* box so
          there's no overflow (hence no horizontal scrollbar) and no dead space. */
       .bracket-fit{}
-      .bracket{display:flex;align-items:stretch;width:1100px;min-width:1100px;height:__H__px;}
+      /* width:max-content packs the columns at their natural size so the flex
+         halves never stretch to fill a wide window (which spread the tree out
+         and pushed the right half off-screen). The JS then scales this to fit. */
+      .bracket{display:flex;align-items:stretch;width:max-content;height:__H__px;}
       .half{display:flex;flex:1;}
       .center{display:flex;flex-direction:column;align-items:center;
               justify-content:center;padding:0 10px;min-width:150px;}
@@ -176,7 +179,8 @@ def render(ko, height=620):
             br=document.querySelector('.bracket');
         if(!wrap||!fit||!br) return;
         if(br.offsetParent!==null){                  // wide layout → scale to fit
-          var natW=br.offsetWidth || 1100, natH=__H__,
+          br.style.transform='none';                 // reset so we measure natural size
+          var natW=Math.max(br.scrollWidth, br.offsetWidth) || 1100, natH=__H__,
               availW=Math.max(0, wrap.clientWidth-8);
           if(availW>0){
             var s=Math.min(1, availW/natW);

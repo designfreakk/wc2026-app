@@ -1,57 +1,46 @@
 # Theme experiment: getfast.ai-inspired design language.
-# Clean white canvas, near-black ink, one vivid red accent. Editorial pairing of
-# a soft serif display face (Fraunces) for headings with a crisp humanist sans
-# (Rubik) for body, and JetBrains Mono for numbers/code. Airy, light, modern.
+# getfast.ai uses ONE typeface for both body and headings — the commercial face
+# Mundial. Mundial isn't on any free CDN, so we use Inter, which is getfast.ai's
+# own declared fallback (--font-secondary: "Inter"): a single clean sans for body
+# and subheadings, differing only by weight/size. Clean white canvas, near-black
+# ink, one vivid red accent, JetBrains Mono for code.
 [theme]
 primaryColor = "#fc0017"             # vivid signature red — buttons, sliders, accents
 backgroundColor = "#ffffff"          # clean white canvas
 secondaryBackgroundColor = "#f7f9fb" # cool off-white for sidebar + cards
 textColor = "#212529"                # near-black ink
 linkColor = "#fc0017"                # red links keep the palette single-accent
-font = "Rubik"                       # body: crisp humanist sans
-headingFont = "Fraunces"             # headings: soft serif display
-codeFont = "JetBrains Mono"          # numbers / code
+font = "Inter"                       # body — getfast.ai's sanctioned fallback for Mundial
+headingFont = "Inter"                # headings: same family as body (getfast.ai style)
+codeFont = "JetBrains Mono"          # code blocks
 baseRadius = "0.75rem"               # soft, rounded corners
 
-# Fraunces — soft serif display for headings (regular / medium / semibold)
+# Inter — single family for body + headings (regular / medium / semibold / bold)
 [[theme.fontFaces]]
-family = "Fraunces"
-url = "https://cdn.jsdelivr.net/fontsource/fonts/fraunces@latest/latin-400-normal.woff2"
+family = "Inter"
+url = "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.woff2"
 weight = 400
 style = "normal"
 
 [[theme.fontFaces]]
-family = "Fraunces"
-url = "https://cdn.jsdelivr.net/fontsource/fonts/fraunces@latest/latin-500-normal.woff2"
+family = "Inter"
+url = "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-500-normal.woff2"
 weight = 500
 style = "normal"
 
 [[theme.fontFaces]]
-family = "Fraunces"
-url = "https://cdn.jsdelivr.net/fontsource/fonts/fraunces@latest/latin-600-normal.woff2"
+family = "Inter"
+url = "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-600-normal.woff2"
 weight = 600
 style = "normal"
 
-# Rubik — body sans (regular / medium / bold)
 [[theme.fontFaces]]
-family = "Rubik"
-url = "https://cdn.jsdelivr.net/fontsource/fonts/rubik@latest/latin-400-normal.woff2"
-weight = 400
-style = "normal"
-
-[[theme.fontFaces]]
-family = "Rubik"
-url = "https://cdn.jsdelivr.net/fontsource/fonts/rubik@latest/latin-500-normal.woff2"
-weight = 500
-style = "normal"
-
-[[theme.fontFaces]]
-family = "Rubik"
-url = "https://cdn.jsdelivr.net/fontsource/fonts/rubik@latest/latin-700-normal.woff2"
+family = "Inter"
+url = "https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-700-normal.woff2"
 weight = 700
 style = "normal"
 
-# JetBrains Mono — tabular numbers / code
+# JetBrains Mono — code blocks
 [[theme.fontFaces]]
 family = "JetBrains Mono"
 url = "https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@latest/latin-400-normal.woff2"

@@ -16,36 +16,38 @@ import views
 
 st.set_page_config(page_title="World Cup 2026 Predictor", page_icon="🏆", layout="wide")
 
-# getfast.ai-inspired editorial styling: Fraunces serif headings (tight, dark),
-# generous line-height, a single red accent, and a clean tab row. Also collapse
-# the empty sidebar rail entirely.
+# getfast.ai-inspired styling: ONE typeface (Inter) for body and headings, just
+# as getfast.ai uses Mundial throughout — headings differ only by weight/size.
+# Near-black ink, a hair of negative tracking, a single red accent, clean tabs.
+# Also collapse the empty sidebar rail entirely.
 st.markdown(
     """
     <style>
       /* hide the sidebar toggle + rail */
       section[data-testid="stSidebar"],
       button[data-testid="collapsedControl"] { display: none !important; }
-      /* editorial serif headings — large, tight, near-black */
-      h1, h2, h3, h4 { font-family: Fraunces, Georgia, serif !important;
+      /* getfast body feel: subtle negative tracking */
+      html, body, [class*="st-"] { letter-spacing: -0.2px; }
+      /* headings share the body face (Inter); only weight + size set them apart */
+      h1, h2, h3, h4 { font-family: Inter, -apple-system, BlinkMacSystemFont,
+                       "Segoe UI", Roboto, sans-serif !important;
                        font-weight: 600 !important; letter-spacing: -0.01em;
-                       line-height: 1.18 !important; overflow-wrap: anywhere;
+                       line-height: 1.25 !important; overflow-wrap: anywhere;
                        color: #212529; }
-      h1 { font-size: 2.6rem !important; letter-spacing: -0.02em; }
-      h2 { font-size: 1.7rem !important; }
-      h3 { font-size: 1.25rem !important; }
-      h4 { font-size: 1.05rem !important; }
+      h1 { font-size: 2.25rem !important; letter-spacing: -0.02em; }
+      h2 { font-size: 1.875rem !important; }
+      h3 { font-size: 1.5rem !important; }
+      h4 { font-size: 1.25rem !important; }
       @media (max-width: 760px){
-        h1 { font-size: 1.9rem !important; }
-        h2 { font-size: 1.35rem !important; }
-        h3 { font-size: 1.1rem !important; }
-        h4 { font-size: 1rem !important; }
+        h1 { font-size: 1.7rem !important; }
+        h2 { font-size: 1.4rem !important; }
+        h3 { font-size: 1.2rem !important; }
+        h4 { font-size: 1.05rem !important; }
       }
       /* tabs: airy, underline-accent, wrap on narrow screens */
       .stTabs [data-baseweb="tab-list"]{ flex-wrap: wrap; gap: 4px;
             border-bottom: 1px solid #dee2e6; }
       .stTabs [data-baseweb="tab"]{ font-weight: 500; }
-      /* numbers feel intentional in mono */
-      [data-testid="stMetricValue"]{ font-family: "JetBrains Mono", ui-monospace, monospace; }
       /* pill-rounded primary button, getfast-style */
       .stButton > button[kind="primary"]{ border-radius: 3rem; font-weight: 600; }
     </style>

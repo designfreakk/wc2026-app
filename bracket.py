@@ -96,7 +96,7 @@ def render(ko, height=620):
         champ = f'<div class="champ">🏆 {w}</div>'
     css = """
     <style>
-      .wrap{font-family:Rubik,-apple-system,Segoe UI,Roboto,sans-serif;background:#ffffff;
+      .wrap{font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;background:#ffffff;
             overflow:hidden;padding:8px 4px;color:#212529;}
       /* JS scales .bracket to fit; .bracket-fit reserves the *scaled* box so
          there's no overflow (hence no horizontal scrollbar) and no dead space. */

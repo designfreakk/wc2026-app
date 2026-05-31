@@ -53,10 +53,14 @@ st.markdown(
 
       /* full-bleed dark hero SECTION — holds the headline, the centered Simulate
          button, and the bracket card floating on the dark band (getfast style) */
-      .st-key-hero{ width:100vw; margin-left:calc(50% - 50vw); background:#1b1b1f;
-                  min-height:90vh; display:flex; flex-direction:column; align-items:center;
-                  justify-content:center; text-align:center;
+      .st-key-hero{ position:relative; z-index:0; min-height:90vh; display:flex;
+                  flex-direction:column; align-items:center; justify-content:center; text-align:center;
                   padding:clamp(4.5rem,11vh,8rem) max(22px, calc(50% - 580px)); box-sizing:border-box; }
+      /* Full-bleed dark band painted by a clipped pseudo-element: it extends a
+         viewport past each edge and .stApp{overflow-x:hidden} clips it, so the
+         band always meets both edges no matter how wide the main column is. */
+      .st-key-hero::before{ content:""; position:absolute; top:0; bottom:0;
+                  left:-100vw; right:-100vw; background:#1b1b1f; z-index:-1; }
       .hero-copy{ margin-bottom:4px; }
       .hero-copy .eyebrow{ color:#fc0017; font-weight:700; text-transform:uppercase;
                   letter-spacing:.26em; font-size:.82rem; margin-bottom:22px; }
@@ -79,17 +83,19 @@ st.markdown(
       [data-testid="stIFrame"] iframe, iframe[title="st.iframe"]{
                   background:#fff; border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,.45); }
 
-      /* Full-bleed bands that flow at their natural height (getfast doesn't force
-         each to a full screen — it just gives them roomy vertical padding). The
-         content sits in a centred ~960px column via the horizontal padding,
-         which collapses to a small gutter on narrow screens. */
+      /* Sections flow at natural height with roomy padding (getfast doesn't force
+         a full screen). Content sits in a centred ~960px column via the
+         horizontal padding, collapsing to a small gutter on narrow screens. */
       .st-key-sec_pred, .st-key-sec_data, .st-key-sec_how, .st-key-sec_mod, .st-key-sec_cta{
-                  width:100vw; margin-left:calc(50% - 50vw); box-sizing:border-box;
+                  position:relative; z-index:0; box-sizing:border-box;
                   display:flex; flex-direction:column;
                   padding:clamp(3.5rem,8vh,6rem) max(22px, calc(50% - 480px)); }
-      /* alternating section backgrounds (sec_pred stays transparent → white) */
-      .st-key-sec_data, .st-key-sec_mod{ background:#f7f9fb; }
-      .st-key-sec_how, .st-key-sec_cta{ background:#ffffff; }
+      /* alternating grey bands via the same clipped-pseudo trick (sec_pred / how /
+         cta stay transparent → white page) */
+      .st-key-sec_data::before, .st-key-sec_mod::before{ content:""; position:absolute;
+                  top:0; bottom:0; left:-100vw; right:-100vw; background:#f7f9fb; z-index:-1; }
+      /* 'Used data sources' is just a small reference table — keep it compact */
+      .st-key-sec_data{ padding-top:clamp(2rem,4vh,3rem); padding-bottom:clamp(2rem,4vh,3rem); }
 
       /* section header block */
       .sec{ text-align:center; max-width:62ch; margin:0 auto 2.6rem; }
@@ -314,7 +320,7 @@ with st.container(key="sec_data"):
          "What it provides": "Per-team attack & defence ratings + home advantage",
          "Coverage": "Derived from the match results above"},
     ])
-    st.dataframe(ds, hide_index=True, use_container_width=True)
+    st.dataframe(ds, hide_index=True, use_container_width=True, height=178)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # HOW IT WORKS

@@ -98,9 +98,11 @@ def render(ko, height=620):
     <style>
       .wrap{font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;background:#ffffff;
             overflow:hidden;padding:8px 4px;color:#212529;}
-      /* JS scales .bracket to fit; .bracket-fit reserves the *scaled* box so
-         there's no overflow (hence no horizontal scrollbar) and no dead space. */
-      .bracket-fit{}
+      /* JS scales .bracket to fit; .bracket-fit reserves the *scaled* box. The
+         scaled .bracket keeps its UNSCALED layout box (transform is visual only),
+         so overflow:hidden clips that phantom box — otherwise the iframe reports
+         the unscaled height and leaves a big white gap below the tree. */
+      .bracket-fit{overflow:hidden;}
       /* width:max-content packs the columns at their natural size so the flex
          halves never stretch to fill a wide window (which spread the tree out
          and pushed the right half off-screen). The JS then scales this to fit. */
@@ -186,7 +188,7 @@ def render(ko, height=620):
           var natW=Math.max(br.scrollWidth, br.offsetWidth) || 1100, natH=__H__,
               availW=Math.max(0, wrap.clientWidth-8);
           if(availW>0){
-            var s=Math.min(1, availW/natW);
+            var s=Math.min(1.4, availW/natW);   // fill the box; allow modest upscaling
             br.style.transformOrigin='top left';
             br.style.transform='scale('+s+')';
             fit.style.width=(natW*s)+'px';

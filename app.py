@@ -55,7 +55,7 @@ st.markdown(
          button, and the bracket card floating on the dark band (getfast style) */
       .st-key-hero{ position:relative; z-index:0; min-height:90vh; display:flex;
                   flex-direction:column; align-items:center; justify-content:center; text-align:center;
-                  padding:clamp(4.5rem,11vh,8rem) max(22px, calc(50% - 580px)); box-sizing:border-box; }
+                  padding:clamp(4.5rem,11vh,8rem) max(22px, calc(50% - 680px)); box-sizing:border-box; }
       /* Full-bleed dark band painted by a clipped pseudo-element: it extends a
          viewport past each edge and .stApp{overflow-x:hidden} clips it, so the
          band always meets both edges no matter how wide the main column is. */
@@ -266,7 +266,7 @@ with st.container(key="hero"):
         unsafe_allow_html=True,
     )
     st.button("Simulate", type="primary", key="btn_hero", on_click=trigger_simulation)
-    components.html(bracket.render(R["ko"], height=640), height=700, scrolling=False)
+    components.html(bracket.render(R["ko"], height=640), height=760, scrolling=False)
     st.markdown(
         f'<div class="hero-cap">One plausible run all the way to the final, where '
         f'<b>{R["winner"]}</b> lift the trophy ({R["title"][R["winner"]]*100:.1f}% of '

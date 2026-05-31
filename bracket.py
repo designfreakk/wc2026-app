@@ -129,13 +129,16 @@ def render(ko, height=620):
       .match-wrap.r::before{content:"";position:absolute;right:0;top:50%;
             width:14px;height:2px;background:#d0d5dd;}
       /* the very first column (R32 leaves) has no incoming line on the outer side */
+      /* Fixed widths (not min-width) so long team names ellipsis-truncate rather
+         than stretching the box — this keeps the bracket's natural width constant
+         regardless of which teams advance, so the iframe aspect-ratio stays exact. */
       .match{background:#fff;border:1px solid #dee2e6;border-radius:8px;
-             box-shadow:0 1px 2px rgba(0,0,0,.06);min-width:118px;overflow:hidden;}
-      .match.f{min-width:140px;border-color:#fc0017;box-shadow:0 2px 8px rgba(252,0,23,.28);}
+             box-shadow:0 1px 2px rgba(0,0,0,.06);width:128px;overflow:hidden;}
+      .match.f{width:150px;border-color:#fc0017;box-shadow:0 2px 8px rgba(252,0,23,.28);}
       .team{display:flex;align-items:center;gap:6px;padding:4px 7px;font-size:12px;
             border-bottom:1px solid #f0f1f3;}
       .team:last-child{border-bottom:0;}
-      .team .name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+      .team .name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
       .team.won{font-weight:700;color:#212529;}
       .team.lost{color:#9aa1ab;}
       .team.lost .flag{filter:grayscale(.7);opacity:.6;}

@@ -79,9 +79,14 @@ st.markdown(
       .stButton>button[kind="primary"]:hover{ background:#d80014; color:#fff; }
       .stButton>button[kind="primary"]:active, .stButton>button[kind="primary"]:focus{ color:#fff; }
 
-      /* the bracket renders in an iframe — make it a glowing white card on the seam */
-      [data-testid="stIFrame"] iframe, iframe[title="st.iframe"]{
-                  background:#fff; border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,.45); }
+      /* The bracket renders in an iframe whose height is otherwise fixed, leaving
+         a big white gap below the tree. The bracket's intrinsic ratio is
+         1436w x 640h; drive the iframe height from its width with aspect-ratio
+         (slightly taller so the bottom row never clips) so the card hugs the
+         tree at any width. Glowing white card on the dark hero. */
+      iframe[title="st.iframe"]{
+                  background:#fff; border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,.45);
+                  width:100%!important; aspect-ratio:1436/660; height:auto!important; }
 
       /* Sections flow at natural height with roomy padding (getfast doesn't force
          a full screen). Content sits in a centred ~960px column via the
